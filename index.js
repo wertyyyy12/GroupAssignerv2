@@ -37,8 +37,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('sessionJoin', (studentData) => {
-      findStudentID(studentData.sessionID)[2].push(studentData.name);
+      if (findStudentID(studentData.sessionID)) {
+        findStudentID(studentData.sessionID)[2].push(studentData.name);
+        socket.emit('sessionSuccess', studentData.sessionID);
+        io.emit('updateStudentList', {
+          name: studentData.name, 
+          sessionID: studentData.sessionID
+        });
+      }
+
+      else {
+        socket.emit('sessionReject');
+      }
     });
+
+    socket.on('Get', (sessionID) => {
+      console.log(findStudentID(sessionID));
+      socket.emit('GetReply', findStudentID(sessionID));
+    });
+
 });
 
 
