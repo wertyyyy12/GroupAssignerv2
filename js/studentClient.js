@@ -20,11 +20,13 @@ $(document).ready(function(){
         console.log(sessionData);
 
         $("#studentList").html("");
-        sessionData[2].forEach(studentName => { 
-            $("#studentList").append(`
-            <input type="checkbox" name="${studentName}" value="${studentName}">
-            <label for="${studentName}">${studentName}</label><br>
-            `);
+        sessionData[2].forEach(studentName => {
+            if (myName != studentName) { 
+                $("#studentList").append(`
+                <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
+                <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
+                `);
+            }
         });
     });
 

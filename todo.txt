@@ -1,6 +1,7 @@
 -xss filtering
 -login w/ google
 -teacher should also be able to view group selections
+    -teacher view student prefrences in real time Oo-o
 -notify if a student has not chosen anyone?
 -duplicate session prevention
     -we create the sessionID instead of them

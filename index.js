@@ -17,15 +17,24 @@ app.use('/html', express.static(__dirname + '/html'));
 app.use(express.static(__dirname + '/js'));
 app.use('/js', express.static(__dirname + '/js'));
 
-function findStudentID(sessionID) {
+function findElementInArray(array, desiredElement, subIndex) {
   var found = false;
-  data.forEach(function(element) {
-    if (element[0] == sessionID) {
-      found = element;
+  array.forEach(function(element) {
+    if (subIndex === undefined) {
+      if (element == desiredElement) {
+        found = element;
+      }
+    }
+
+    else {
+      if (element[subIndex] == desiredElement) {
+        found = element;
+      }
     }
   });
   return found;
 }
+
 io.on('connection', (socket) => {
     console.log('User connected.');
     socket.on('disconnect', () => {
@@ -37,8 +46,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('sessionJoin', (studentData) => {
-      if (findStudentID(studentData.sessionID)) {
-        findStudentID(studentData.sessionID)[2].push(studentData.name);
+      var sessionData = findElementInArray(data, studentData.sessionID, 0);
+      if (sessionData) {
+        sessionData[2].push(studentData.name);
         socket.emit('sessionSuccess', studentData.sessionID);
         io.emit('updateStudentList', {
           name: studentData.name, 
@@ -52,8 +62,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('Get', (sessionID) => {
-      console.log(findStudentID(sessionID));
-      socket.emit('GetReply', findStudentID(sessionID));
+      var sessionData = findElementInArray(data, sessionID, 0);
+      socket.emit('GetReply', sessionData);
     });
 
 });
