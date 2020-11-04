@@ -51,8 +51,8 @@ io.on('connection', (socket) => {
         sessionData[2].push(studentData.name);
         socket.emit('sessionSuccess', studentData.sessionID);
         io.emit('updateStudentList', {
-          name: studentData.name, 
-          sessionID: studentData.sessionID
+          SessionData: sessionData, 
+          name: studentData.name
         });
       }
 
@@ -64,6 +64,16 @@ io.on('connection', (socket) => {
     socket.on('Get', (sessionID) => {
       var sessionData = findElementInArray(data, sessionID, 0);
       socket.emit('GetReply', sessionData);
+    });
+
+    socket.on('endSession', (sessionID) => {
+      io.emit('clientSessionEnd', sessionID);
+    });
+
+    socket.on('studentSendData', (sentData) => {
+      var sessionData = findElementInArray(data, sessionID, 0);
+      sessionData.push(sentData);
+      console.log(sessionData);
     });
 
 });

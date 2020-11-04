@@ -19,30 +19,56 @@ $(document).ready(function(){
         sessionData = retrievedSessionData;
         console.log(sessionData);
 
-        $("#studentList").html("");
         sessionData[2].forEach(studentName => {
-            if (myName != studentName) { 
-                $("#studentList").append(`
-                <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
-                <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
-                `);
+            if (myName != studentName) {
+                if ($(`#${studentName}`).get().length == 0){
+                    $("#studentList").append(`
+                    <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
+                    <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
+                    `);
+                    console.log($(`#${studentName}`));
+                }
             }
         });
     });
 
-    socket.on("updateStudentList", function(studentData) {
-        if (mySessionID == studentData.sessionID) {
-            // if (myName != studentData.name) {
-                socket.emit("Get", mySessionID);
-                $("#joinSession").prop("disabled", true);
-            // }
+    socket.on("updateStudentList", function(retrieved) {
+        if (mySessionID == retrieved.SessionData[0]) {
 
-        }
+            retrieved.SessionData[2].forEach(studentName => {
+                if (myName != studentName) {
+                    if ($(`#${studentName}`).get().length == 0){
+                        $("#studentList").append(`
+                        <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
+                        <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
+                        `);
+                        console.log($(`#${studentName}`));
+                    }
+                }
+            });
 
-        else {
-            toastr.error("uh oh lks");
+            // socket.emit("Get", mySessionID);
+            $("#joinSession").prop("disabled", true);
+
         }
     });
+
+    socket.on("clientSessionEnd", function(sessionID) {
+        if (mySessionID == sessionID) {
+            var myPrefs = [];
+            $("input[type=checkbox]").each(function() {
+                if ($(this).is(":checked")) {
+                    myPrefs.push($(this).val());
+                }
+            });
+
+            console.log(myPrefs);
+            socket.emit("studentSendData", [myName, myPrefs]);
+            toastr.info("This session has ended.");
+
+        }
+    });
+
 
     $("#joinSession").click(function() {
         if ($("#sID").val() != "") {
