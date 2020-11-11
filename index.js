@@ -7,9 +7,11 @@ var port = 3001;
 var data = [];
 // data is stored like [sID, g#, studentList, prefs]
 
+
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
 });
+
 
 app.use(express.static(__dirname + '/html'));
 app.use('/html', express.static(__dirname + '/html'));
@@ -61,19 +63,13 @@ io.on('connection', (socket) => {
       }
     });
 
-    socket.on('Get', (sessionID) => {
-      var sessionData = findElementInArray(data, sessionID, 0);
-      socket.emit('GetReply', sessionData);
-    });
-
     socket.on('endSession', (sessionID) => {
       io.emit('clientSessionEnd', sessionID);
     });
 
     socket.on('studentSendData', (sentData) => {
-      var sessionData = findElementInArray(data, sessionID, 0);
-      sessionData.push(sentData);
-      console.log(sessionData);
+      var sessionData = findElementInArray(data, sentData.sessionID, 0);
+      sessionData[3].push(sentData.prefs);
     });
 
 });
