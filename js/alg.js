@@ -1,11 +1,9 @@
-const { group } = require("console");
-const e = require("express");
-const { remove } = require("fs-extra");
-const { array } = require("yargs");
+// const { group } = require("console");
+// const e = require("express");
+// const { remove } = require("fs-extra");
+// const { array } = require("yargs");
 
-function arrayRemove(array, element) {
-  return array.filter(elem => elem != element);
-}
+const { completion } = require("yargs");
 
 function arrayRemoveSet(array, removeArray) {
   var arrayCopy = array;
@@ -14,25 +12,6 @@ function arrayRemoveSet(array, removeArray) {
   });
 
   return arrayCopy;
-}
-
-
-function splitIntoGroups(groupSize, studentList) {
-  var numGroups = Math.ceil(studentList.length / groupSize);
-  var splitGroups = [];
-  for (var i = 0; i < numGroups; i++) {
-    splitGroups.push([]);
-  }
-
-  var j = 0;
-  for (var i = 0; i < studentList.length; i++) {
-    if (splitGroups[j].length >= groupSize) {
-      j++;
-    }
-    splitGroups[j].push(studentList[i]);
-  }
-  
-  return splitGroups;
 }
 
 function findStudentPrefs(student, prefs) {
@@ -45,23 +24,6 @@ function findStudentPrefs(student, prefs) {
 
   return studentPrefs;
 }
-
-function pushIntoGroups(studentSet, groups, groupSize) {
-  var groupToPush = groups.find(group => (group.length + studentSet.length) <= groupSize);
-  studentSet.forEach((student) => {
-    groupToPush.push(student);
-  });  
-}
-
-
-function findOptimum(prefs, studentList, groupSize) {
-  var bestGroups = [];
-
-  var numGroups = Math.ceil(studentList.length / groupSize);
-  for (var i = 0; i < numGroups; i++) {
-    bestGroups.push([]); //initialize groups with empty arrays (to be pushed later)
-  }
-} 
 
 function generateCombinations(sourceArray, comboLength) {
   const sourceLength = sourceArray.length;
@@ -89,61 +51,60 @@ function generateCombinations(sourceArray, comboLength) {
 }
 
 function endSwap(array, newArray) {
-  var arrayCopy = array;
-  arrayCopy.splice(-1 * newArray.length);
-  newArray.forEach((element) => {
-    arrayCopy.push(element);
-  });
-  return arrayCopy;
+	var copy = JSON.parse(JSON.stringify(array)); 
+	Array.prototype.splice.apply(copy, [copy.length-newArray.length, newArray.length].concat(newArray));
+  return copy;
 }
 
 
-console.log("FINAL: ");
+// console.log(endSwap([1, 2, 3, 4], [4234, 23234]));
+
 
 var testPrefs = [[1, [4, 3]], [2, [7, 1]], [3, [1]], [4, [5, 2]], [5, [3, 7]], [6, [1]], [7, [2]]];
 var testList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 var sampleGroupArray = [];
 const final = [];
-var i = 0;
-var nG = 3;
-function pickSlot(index, list, groupSize) {
+function pickSlot(index, list, groupSize, nG) { //nG = num groups
 
   generateCombinations(list, groupSize).forEach((set) => {
-    // console.log("set: ")
-    // console.log(set);
 
     sampleGroupArray.push(set);
     var newSource = arrayRemoveSet(list, set);
-    // console.log("new :")
-    // console.log(newSource);
     if (newSource.length > 0) {
-      pickSlot(index++, newSource, groupSize);
+      pickSlot(index++, newSource, groupSize, nG);
     }
 
     if (newSource.length == 0) {
       if (sampleGroupArray.length >= nG) {
-        console.log("yay!");
-        console.log(sampleGroupArray);
+        // final[index] = sampleGroupArray;
         final.push(sampleGroupArray);
+        // console.log(sampleGroupArray);
         sampleGroupArray = [];
       }
 
       else {
-        console.log("bruh");
-        console.log(sampleGroupArray);
         var lastOutput = final[final.length-1];
+        // var lOC = JSON.parse(JSON.stringify(lastOutput));
+        // console.log(lOC);
         var newOutput = endSwap(lastOutput, sampleGroupArray);
-        console.log(lastOutput);
-        console.log(newOutput);
         sampleGroupArray = [];
-
         final.push(newOutput);
 
       }
     }
   });
+  // console.log(final);
   return final;
 } 
-console.log(pickSlot(0, testList, 3));
+
+function possibleGroups(index, list, groupSize) {
+  var numGroups = Math.ceil(list.length / groupSize);
+  return pickSlot(index, list, groupSize, numGroups);
+}
+// console.log(possibleGroups(0, testList, 3));
+possibleGroups(0, testList, 3).forEach((group) => {
+  console.log(group);
+})
+// console.log(possibleGroups(0, testList, 3).length);
 
 // // findOptimum(testPrefs, testList, 4);
