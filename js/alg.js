@@ -63,48 +63,49 @@ function endSwap(array, newArray) {
 var testPrefs = [[1, [4, 3]], [2, [7, 1]], [3, [1]], [4, [5, 2]], [5, [3, 7]], [6, [1]], [7, [2]]];
 var testList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 var sampleGroupArray = [];
-const final = [];
-function pickSlot(index, list, groupSize, nG) { //nG = num groups
 
-  generateCombinations(list, groupSize).forEach((set) => {
 
-    sampleGroupArray.push(set);
-    var newSource = arrayRemoveSet(list, set);
-    if (newSource.length > 0) {
-      pickSlot(index++, newSource, groupSize, nG);
-    }
-
-    if (newSource.length == 0) {
-      if (sampleGroupArray.length >= nG) {
-        // final[index] = sampleGroupArray;
-        final.push(sampleGroupArray);
-        // console.log(sampleGroupArray);
-        sampleGroupArray = [];
-      }
-
-      else {
-        var lastOutput = final[final.length-1];
-        // var lOC = JSON.parse(JSON.stringify(lastOutput));
-        // console.log(lOC);
-        var newOutput = endSwap(lastOutput, sampleGroupArray);
-        sampleGroupArray = [];
-        final.push(newOutput);
-
-      }
-    }
-  });
-  // console.log(final);
-  return final;
-} 
-
-function possibleGroups(index, list, groupSize) {
+function possibleGroups(list, groupSize) {
   var numGroups = Math.ceil(list.length / groupSize);
-  return pickSlot(index, list, groupSize, numGroups);
+  // console.log(pickSlot(list, groupSize, numGroups).length);
+  const final = [];
+  function pickSlot(list, groupSize, nG) { //nG = num groups
+    generateCombinations(list, groupSize).forEach((set) => {
+
+      sampleGroupArray.push(set);
+      var newSource = arrayRemoveSet(list, set);
+      if (newSource.length > 0) {
+        pickSlot(newSource, groupSize, nG);
+      }
+
+      if (newSource.length == 0) {
+        if (sampleGroupArray.length >= nG) {
+          // final[index] = sampleGroupArray;
+          final.push(sampleGroupArray);
+          // console.log(sampleGroupArray);
+          sampleGroupArray = [];
+        }
+
+        else {
+          var lastOutput = final[final.length-1];
+          // var lOC = JSON.parse(JSON.stringify(lastOutput));
+          // console.log(lOC);
+          var newOutput = endSwap(lastOutput, sampleGroupArray);
+          sampleGroupArray = [];
+          final.push(newOutput);
+
+        }
+      }
+    });
+    // console.log(final);
+    return final;
+  } 
+  return pickSlot(list, groupSize, numGroups);
 }
 // console.log(possibleGroups(0, testList, 3));
-possibleGroups(0, testList, 3).forEach((group) => {
+possibleGroups(testList, 3).forEach((group) => {
   console.log(group);
 })
-// console.log(possibleGroups(0, testList, 3).length);
+console.log(possibleGroups(testList, 3).length);
 
 // // findOptimum(testPrefs, testList, 4);
