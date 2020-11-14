@@ -10,101 +10,97 @@ var testPrefs = [
   [8, [4, 6]]
 ];
 
-function splitIntoGroups(groupSize, studentList) {
-  var numGroups = Math.ceil(studentList.length / groupSize);
-  var splitGroups = [];
-  for (var i = 0; i < numGroups; i++) {
-    splitGroups.push([]);
-  }
-
-  var j = 0;
-  for (var i = 0; i < studentList.length; i++) {
-    if (splitGroups[j].length >= groupSize) {
-      j++;
+function findOptimum(groupSize, studentList, prefs) {
+  function splitIntoGroups(groupSize, studentList) {
+    var numGroups = Math.ceil(studentList.length / groupSize);
+    var splitGroups = [];
+    for (var i = 0; i < numGroups; i++) {
+      splitGroups.push([]);
     }
-    splitGroups[j].push(studentList[i]);
-  }
-
-  return splitGroups;
-}
-
-function arrayRemove(array, element) {
-  var arrayCopy = JSON.parse(JSON.stringify(array));
-  return arrayCopy.filter(elem => elem != element);
-}
-
-function findWanting(person, prefs) { //find who wants a certain person in their group
-  var people = [];
-  prefs.forEach((pref) => {
-    var student = pref[0];
-    var studentPrefs = pref[1];
-
-    if (studentPrefs.includes(person)) {
-      people.push(student);    
+  
+    var j = 0;
+    for (var i = 0; i < studentList.length; i++) {
+      if (splitGroups[j].length >= groupSize) {
+        j++;
+      }
+      splitGroups[j].push(studentList[i]);
     }
-  });
-
-  return people;
-
-}
-
-function findStudentPrefs(student, prefs) {
-  var studentPrefs = false;
-  prefs.forEach((pref) => {
-    if (pref[0] == student) {
-      studentPrefs = pref;
-    }
-  });
-
-  return studentPrefs;
-}
-
-function swapTwoPeople(sG, studentA, studentB) { 
-
-  var splitGroups = JSON.parse(JSON.stringify(sG));
-  var Agroup = splitGroups.find(group => group.includes(studentA));
-  var Bgroup = splitGroups.find(group => group.includes(studentB));
-
-  if (Agroup == Bgroup) {
+  
     return splitGroups;
   }
-  console.log("SG:");
-  console.log(splitGroups);
 
-  console.log("students: ");
-  console.log(studentA, studentB);
-
-  console.log("groups:");
-  console.log(Agroup, Bgroup);
-
-  // console.log(Agroup);
-  // console.log(Bgroup);
-  var Aindex = splitGroups.indexOf(Agroup);
-  var Bindex = splitGroups.indexOf(Bgroup);
-
+  var sG = splitIntoGroups(groupSize, studentList);
+  function arrayRemove(array, element) {
+    var arrayCopy = JSON.parse(JSON.stringify(array));
+    return arrayCopy.filter(elem => elem != element);
+  }
   
-  Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
-  console.log(Agroup);
-  Bgroup = arrayRemove(Bgroup, studentB);
-  console.log(Bgroup[Bindex]);
-
-  Bgroup.push(studentA); //shove them in different groups
-  Agroup.push(studentB);
-
-  splitGroups[Aindex] = Agroup;
-  splitGroups[Bindex] = Bgroup;
-
-
-  console.log("FINAL");
-  console.log(splitGroups);
-  return splitGroups;
-}
-
-// console.log(T);
-
-//A swaps with B
-
-function findOptimum(sG, prefs) {
+  function findWanting(person, prefs) { //find who wants a certain person in their group
+    var people = [];
+    prefs.forEach((pref) => {
+      var student = pref[0];
+      var studentPrefs = pref[1];
+  
+      if (studentPrefs.includes(person)) {
+        people.push(student);    
+      }
+    });
+  
+    return people;
+  
+  }
+  
+  function findStudentPrefs(student, prefs) {
+    var studentPrefs = false;
+    prefs.forEach((pref) => {
+      if (pref[0] == student) {
+        studentPrefs = pref;
+      }
+    });
+  
+    return studentPrefs;
+  }
+  
+  function swapTwoPeople(sG, studentA, studentB) { 
+  
+    var splitGroups = JSON.parse(JSON.stringify(sG));
+    var Agroup = splitGroups.find(group => group.includes(studentA));
+    var Bgroup = splitGroups.find(group => group.includes(studentB));
+  
+    if (Agroup == Bgroup) {
+      return splitGroups;
+    }
+    console.log("SG:");
+    console.log(splitGroups);
+  
+    console.log("students: ");
+    console.log(studentA, studentB);
+  
+    console.log("groups:");
+    console.log(Agroup, Bgroup);
+  
+    // console.log(Agroup);
+    // console.log(Bgroup);
+    var Aindex = splitGroups.indexOf(Agroup);
+    var Bindex = splitGroups.indexOf(Bgroup);
+  
+    
+    Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
+    console.log(Agroup);
+    Bgroup = arrayRemove(Bgroup, studentB);
+    console.log(Bgroup[Bindex]);
+  
+    Bgroup.push(studentA); //shove them in different groups
+    Agroup.push(studentB);
+  
+    splitGroups[Aindex] = Agroup;
+    splitGroups[Bindex] = Bgroup;
+  
+  
+    console.log("FINAL");
+    console.log(splitGroups);
+    return splitGroups;
+  }
   var splitGroups = JSON.parse(JSON.stringify(sG));
   prefs.forEach((pref) => {
     var student = pref[0];
@@ -196,7 +192,4 @@ function findOptimum(sG, prefs) {
   return splitGroups;
 }
 
-
-var testSplitGroups = splitIntoGroups(3, testList);
-console.log(testSplitGroups);
-console.log(findOptimum(splitIntoGroups(4, testList), testPrefs));
+console.log(findOptimum(4, testList, testPrefs));
