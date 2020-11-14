@@ -1,14 +1,13 @@
-var testList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+var testList = [1, 2, 3, 4, 5, 6, 7, 8];
 var testPrefs = [
-  [1, [3, 6]],
-  [2, [3, 9]],
+  [1, [5]],
+  [2, [7]],
   [3, [5]],
   [4, [3]],
-  [5, [2]],
+  [5, [1]],
   [6, [2, 1]],
-  [7, [4, 6, 5]],
-  [8, [4, 6]],
-  [9, [5]]
+  [7, [2]],
+  [8, [4, 6]]
 ];
 
 function splitIntoGroups(groupSize, studentList) {
@@ -60,6 +59,49 @@ function findStudentPrefs(student, prefs) {
   return studentPrefs;
 }
 
+function swapTwoPeople(sG, studentA, studentB) { 
+
+  var splitGroups = JSON.parse(JSON.stringify(sG));
+  var Agroup = splitGroups.find(group => group.includes(studentA));
+  var Bgroup = splitGroups.find(group => group.includes(studentB));
+
+  if (Agroup == Bgroup) {
+    return splitGroups;
+  }
+  console.log("SG:");
+  console.log(splitGroups);
+
+  console.log("students: ");
+  console.log(studentA, studentB);
+
+  console.log("groups:");
+  console.log(Agroup, Bgroup);
+
+  // console.log(Agroup);
+  // console.log(Bgroup);
+  var Aindex = splitGroups.indexOf(Agroup);
+  var Bindex = splitGroups.indexOf(Bgroup);
+
+  
+  Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
+  console.log(Agroup);
+  Bgroup = arrayRemove(Bgroup, studentB);
+  console.log(Bgroup[Bindex]);
+
+  Bgroup.push(studentA); //shove them in different groups
+  Agroup.push(studentB);
+
+  splitGroups[Aindex] = Agroup;
+  splitGroups[Bindex] = Bgroup;
+
+
+  console.log("FINAL");
+  console.log(splitGroups);
+  return splitGroups;
+}
+
+// console.log(T);
+
 //A swaps with B
 
 function findOptimum(sG, prefs) {
@@ -72,7 +114,7 @@ function findOptimum(sG, prefs) {
     studentPrefs.forEach((person) => {
       var personGroup = splitGroups.find(group => group.includes(person));
 
-      if (personGroup != studentGroup) { //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
+      //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
         var swapPeople = arrayRemove(personGroup, person);
 
         swapPeople.forEach((swapPerson) => { //for every person to swap with
@@ -90,9 +132,17 @@ function findOptimum(sG, prefs) {
               console.log(`${Bperson} wanted ${swapPerson}`);
             }
 
+            if (wantingA.includes(Bperson)) { //somone in B's group wants A
+              gain++;
+            }
+
             if (Bprefs.includes(Bperson)) { //B wanted someone in group B
               gain--;
               console.log(`${swapPerson} wanted ${Bperson}`);
+            }
+
+            if (studentPrefs.includes(Bperson)) { //A wants someone in B group
+              gain++;
             }
           });
 
@@ -102,11 +152,28 @@ function findOptimum(sG, prefs) {
               console.log(`${Aperson} wanted ${student}`);
             }
 
+            if (wantingB.includes(Aperson)) { //somone in A's group wants B
+              gain++;
+            }
+
             if (studentPrefs.includes(Aperson)) { //A wanted someoen in their group
               gain--;
               console.log(`${student} wanted ${Aperson}`);
             }
+
+            if (Bprefs.includes(Aperson)) { //B wants someone in A group
+              gain++;
+            }
           });
+
+          if (gain > 0) {
+            console.log("SWAPPING!");
+
+            console.log(swapPerson);
+            console.log(student);
+            splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
+            //swap
+          }
 
           // studentGroup.forEach((Aperson) => {
           //   if (wantingA.includes(Aperson)) { //someone in A's group wanted A
@@ -123,18 +190,13 @@ function findOptimum(sG, prefs) {
 
         });
         
-
-
-        //GAIN calculations
-
-
-
-      }
     });
   });
+
+  return splitGroups;
 }
 
 
 var testSplitGroups = splitIntoGroups(3, testList);
 console.log(testSplitGroups);
-findOptimum(splitIntoGroups(3, testList), testPrefs);
+console.log(findOptimum(splitIntoGroups(4, testList), testPrefs));
