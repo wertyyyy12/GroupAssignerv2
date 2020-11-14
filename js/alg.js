@@ -71,44 +71,62 @@ function findOptimum(sG, prefs) {
 
     studentPrefs.forEach((person) => {
       var personGroup = splitGroups.find(group => group.includes(person));
-      var gain = 0;
-      if (personGroup != studentGroup) { //the person wants a swap; "student" wants to swap with "person" (student = A, person = B)
-        //COST calculations (anything that violates prefrences)
+
+      if (personGroup != studentGroup) { //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
         var swapPeople = arrayRemove(personGroup, person);
-        var wantingPersonB = findWanting(person, prefs);
-        var wantingPersonA = findWanting(student, prefs);
+
         swapPeople.forEach((swapPerson) => { //for every person to swap with
-          if (wantingPersonB.includes(swapPerson)) { //then a swap person (a person in pB's group) wanted B
-            gain--;
-          }
-        });
+          var gain = 0;
+          //student -> A, swapPerson -> B 
+          //A group = studentGroup, B group = personGroup (same as swap group)
+          //Aprefs = studentPrefs, Bprefs = Bprefs
+          var wantingA = findWanting(student, prefs);
+          var wantingB = findWanting(swapPerson, prefs);
+          var Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
-        //check if person B wanted anyone in their group
-        var personBprefs = findStudentPrefs(person, prefs);
-        personGroup.forEach((BgroupMember) => {
-          if (personBprefs[1].includes(BgroupMember)) {
-            gain--;
-          }
-        });
+          personGroup.forEach((Bperson) => {
+            if (wantingB.includes(Bperson)) { //someone in B's group wanted B
+              gain--;
+              console.log(`${Bperson} wanted ${swapPerson}`);
+            }
 
-        //check if any person in group A wanted A
-        studentGroup.forEach((AgroupPerson) => { //for every person to swap with
-          if (wantingPersonA.includes(AgroupPerson)) { //then a swap person (a person in pB's group) wanted B
-            gain--;
-          }
-        });
+            if (Bprefs.includes(Bperson)) { //B wanted someone in group B
+              gain--;
+              console.log(`${swapPerson} wanted ${Bperson}`);
+            }
+          });
 
-        var personAprefs = findStudentPrefs(student, prefs); //check if A wanted anyone in their group
-        studentGroup.forEach((AgroupMember) => {
-          if (personAprefs[1].includes(AgroupMember)) {
-            gain--;
-          }
+          studentGroup.forEach((Aperson) => {
+            if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+              gain--;
+              console.log(`${Aperson} wanted ${student}`);
+            }
+
+            if (studentPrefs.includes(Aperson)) { //A wanted someoen in their group
+              gain--;
+              console.log(`${student} wanted ${Aperson}`);
+            }
+          });
+
+          // studentGroup.forEach((Aperson) => {
+          //   if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+          //     gain--;
+          //   }
+          // });
+          
+
+          console.log("SWAP COST: ");
+          console.log(student);
+          console.log(swapPerson);
+          console.log(gain);
+          console.log("");
+
         });
         
-        console.log(gain);
+
 
         //GAIN calculations
-        
+
 
 
       }
