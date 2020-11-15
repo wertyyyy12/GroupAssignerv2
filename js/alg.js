@@ -1,16 +1,13 @@
-var testList = [1, 2, 3, 4, 5, 6, 7, 8];
+var testList = [1, 2, 3, 4];
 var testPrefs = [
-  [1, [5]],
-  [2, [7]],
-  [3, [5]],
-  [4, [3]],
-  [5, [1]],
-  [6, [2, 1]],
-  [7, [2]],
-  [8, [4, 6]]
+  [1, [2]],
+  [2, [3]],
+  [3, [4]],
+  [4, [3]]
 ];
 
 function findOptimum(groupSize, studentList, prefs) {
+
   function splitIntoGroups(groupSize, studentList) {
     var numGroups = Math.ceil(studentList.length / groupSize);
     var splitGroups = [];
@@ -28,8 +25,6 @@ function findOptimum(groupSize, studentList, prefs) {
   
     return splitGroups;
   }
-
-  var sG = splitIntoGroups(groupSize, studentList);
   function arrayRemove(array, element) {
     var arrayCopy = JSON.parse(JSON.stringify(array));
     return arrayCopy.filter(elem => elem != element);
@@ -70,25 +65,13 @@ function findOptimum(groupSize, studentList, prefs) {
     if (Agroup == Bgroup) {
       return splitGroups;
     }
-    console.log("SG:");
-    console.log(splitGroups);
   
-    console.log("students: ");
-    console.log(studentA, studentB);
-  
-    console.log("groups:");
-    console.log(Agroup, Bgroup);
-  
-    // console.log(Agroup);
-    // console.log(Bgroup);
     var Aindex = splitGroups.indexOf(Agroup);
     var Bindex = splitGroups.indexOf(Bgroup);
   
     
     Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
-    console.log(Agroup);
     Bgroup = arrayRemove(Bgroup, studentB);
-    console.log(Bgroup[Bindex]);
   
     Bgroup.push(studentA); //shove them in different groups
     Agroup.push(studentB);
@@ -96,12 +79,10 @@ function findOptimum(groupSize, studentList, prefs) {
     splitGroups[Aindex] = Agroup;
     splitGroups[Bindex] = Bgroup;
   
-  
-    console.log("FINAL");
-    console.log(splitGroups);
     return splitGroups;
   }
-  var splitGroups = JSON.parse(JSON.stringify(sG));
+
+  var splitGroups = splitIntoGroups(groupSize, studentList);
   prefs.forEach((pref) => {
     var student = pref[0];
     var studentPrefs = pref[1];
@@ -125,7 +106,6 @@ function findOptimum(groupSize, studentList, prefs) {
           personGroup.forEach((Bperson) => {
             if (wantingB.includes(Bperson)) { //someone in B's group wanted B
               gain--;
-              console.log(`${Bperson} wanted ${swapPerson}`);
             }
 
             if (wantingA.includes(Bperson)) { //somone in B's group wants A
@@ -134,7 +114,6 @@ function findOptimum(groupSize, studentList, prefs) {
 
             if (Bprefs.includes(Bperson)) { //B wanted someone in group B
               gain--;
-              console.log(`${swapPerson} wanted ${Bperson}`);
             }
 
             if (studentPrefs.includes(Bperson)) { //A wants someone in B group
@@ -145,7 +124,6 @@ function findOptimum(groupSize, studentList, prefs) {
           studentGroup.forEach((Aperson) => {
             if (wantingA.includes(Aperson)) { //someone in A's group wanted A
               gain--;
-              console.log(`${Aperson} wanted ${student}`);
             }
 
             if (wantingB.includes(Aperson)) { //somone in A's group wants B
@@ -154,7 +132,6 @@ function findOptimum(groupSize, studentList, prefs) {
 
             if (studentPrefs.includes(Aperson)) { //A wanted someoen in their group
               gain--;
-              console.log(`${student} wanted ${Aperson}`);
             }
 
             if (Bprefs.includes(Aperson)) { //B wants someone in A group
@@ -163,10 +140,6 @@ function findOptimum(groupSize, studentList, prefs) {
           });
 
           if (gain > 0) {
-            console.log("SWAPPING!");
-
-            console.log(swapPerson);
-            console.log(student);
             splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
             //swap
           }
@@ -176,20 +149,18 @@ function findOptimum(groupSize, studentList, prefs) {
           //     gain--;
           //   }
           // });
-          
-
-          console.log("SWAP COST: ");
-          console.log(student);
-          console.log(swapPerson);
-          console.log(gain);
-          console.log("");
 
         });
         
     });
   });
 
+  if (splitGroups[splitGroups.length - 1].length < 2) {
+    splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
+    splitGroups.pop();
+    console.log("pushed extra");
+  }
   return splitGroups;
 }
 
-console.log(findOptimum(4, testList, testPrefs));
+console.log(findOptimum(3, testList, testPrefs));

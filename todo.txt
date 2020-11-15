@@ -7,3 +7,5 @@
     -we create the sessionID instead of them
 -"ready" button on student end, teacher be able to see how many students are ready
 -exit/end session on disconnect
+-additional backwards pass on group making alg?
+-notify the teacher if there is a group with extra members
