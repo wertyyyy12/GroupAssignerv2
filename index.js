@@ -210,6 +210,31 @@ io.on('connection', (socket) => {
           SessionData: sessionData, 
           name: studentData.name
         });
+
+
+        var leftOverStudents = sessionData[2].length % sessionData[1];
+        if (leftOverStudents != 0) {
+          if (sessionData[2].length >= sessionData[1]) {
+            var violationGroupSize;
+            if (leftOverStudents == 1) {
+              violationGroupSize = parseInt(sessionData[1]) + 1;
+            }
+
+            else if (leftOverStudents > 1) {
+              violationGroupSize = leftOverStudents;
+            }
+
+            socket.broadcast.emit('potentialViolation', { //tells teachers to update student leftover counters
+              violation: true,
+              sessionID: studentData.sessionID,
+              leftOver: violationGroupSize
+            });
+          }
+        }
+
+        else {
+          socket.broadcast.emit('potentialViolation', {violation: false});
+        }
       }
 
       else {

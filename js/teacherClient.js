@@ -1,5 +1,18 @@
 $(document).ready(function(){
     var socket = io();
+    var mySessionID = $("#sID").val();
+
+    socket.on("potentialViolation", function(data) {
+        if (data.violation) {
+            if (data.sessionID == mySessionID) {
+                $("#groupSizeViolation").html(`There will be a group with ${data.leftOver} students with the current student list.`);
+            }
+        }
+
+        else {
+            $("#groupSizeViolation").html(`All groups have ${$("#groupSize").val()} students.`);
+        }
+    });
 
     $("#startSession").click(function() {
         if ($("#sID").val() != "") {
@@ -19,6 +32,7 @@ $(document).ready(function(){
                 toastr.success("Session Created");
 
                 $("#endSession").css("display", "inline");
+
             }
         }
     });
