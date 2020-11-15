@@ -9,3 +9,4 @@
 -exit/end session on disconnect
 -additional backwards pass on group making alg?
 -notify the teacher if there is a group with extra members
+-strict max teacher group setting

@@ -250,8 +250,11 @@ io.on('connection', (socket) => {
       var sessionData = findElementInArray(data, sentData.sessionID, 0);
       sessionData[3].push(sentData.prefs);
 
-      if (sessionData[3].length == sessionData[2].length) {
-        io.emit('GetGroups', findOptimum(sessionData[1], sessionData[2], sessionData[3]));
+      if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
+        io.emit('GetGroups', {
+          sessionID: sessionData[0],
+          groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
+        });
       }
 
       else {
