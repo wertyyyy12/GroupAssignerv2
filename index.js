@@ -226,12 +226,11 @@ io.on('connection', (socket) => {
       sessionData[3].push(sentData.prefs);
 
       if (sessionData[3].length == sessionData[2].length) {
-        console.log(JSON.stringify(sessionData));
-        console.log(findOptimum(sessionData[1], sessionData[2], sessionData[3]));
+        io.emit('GetGroups', findOptimum(sessionData[1], sessionData[2], sessionData[3]));
       }
 
       else {
-        console.log("data corrupted.");
+        console.log("data not ready.");
       }
     });
 

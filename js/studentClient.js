@@ -54,6 +54,19 @@ $(document).ready(function(){
         }
     });
 
+    socket.on("GetGroups", function(groups) {
+        groups.forEach((group, index) => {
+            $("#groupsList").append(`
+            <h3>Group ${index + 1}: </h3>
+            <ul id="GroupList${index + 1}"></ul>
+            `);
+
+            group.forEach((person) => {
+                $(`#GroupList${index + 1}`).append(`<li>${person}</li>`);
+            });
+        }) 
+    });
+
 
     $("#joinSession").click(function() {
         if ($("#sID").val() != "") {
