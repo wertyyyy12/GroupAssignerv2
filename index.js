@@ -5,7 +5,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = 3001;
 var data = [];
-// data is stored like [sID, g#, studentList, prefs]
+// data (each dataCell) is stored like [sID, g#, studentList, prefs]
 function findOptimum(groupSize, studentList, prefs) {
 
   function splitIntoGroups(groupSize, studentList) {
@@ -202,7 +202,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('sessionJoin', (studentData) => {
-      var sessionData = findElementInArray(data, studentData.sessionID, 0);
+      var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
       if (sessionData) {
         sessionData[2].push(studentData.name);
         socket.emit('sessionSuccess', studentData.sessionID);
@@ -259,6 +259,23 @@ io.on('connection', (socket) => {
 
       else {
         console.log("data not ready.");
+      }
+    });
+
+    socket.on("validateSessionID", (sessionID) => {
+      var flag = false; //is this sID a duplicate?
+      data.forEach((dataCell) => {
+        if (dataCell[0] == sessionID) {
+          flag = true;
+        }
+      });
+
+      if (!flag) {
+        socket.emit("sIDvalidationResult", true); //true = yes, this sessionID is fine
+      }
+
+      else {
+        socket.emit("sIDvalidationResult", false); //false -> no, this sessionID is a duplicate
       }
     });
 

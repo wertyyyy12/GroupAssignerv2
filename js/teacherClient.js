@@ -1,6 +1,33 @@
+
 $(document).ready(function(){
     var socket = io();
-    var mySessionID = $("#sID").val();
+
+    function makeid(length) { //ty SO
+        var result           = '';
+        var characters       = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+           result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+
+        return result;
+
+    }
+
+    var mySessionID = makeid(7);
+    socket.emit("validateSessionID", mySessionID);
+
+    socket.on("sIDvalidationResult", (result) => {
+        if (result) { //if that sessionID was not a duplicate
+            $("#sID").html(`Session ID: ${mySessionID}`);
+        }
+
+        else {
+            mySessionID = makeid(7);  //otherwise, try making a new one and see if that works
+            socket.emit("validateSessionID", mySessionID);
+        }
+    });
+
 
     socket.on("potentialViolation", function(data) {
         if (data.violation) {
@@ -31,10 +58,10 @@ $(document).ready(function(){
     });
 
     $("#startSession").click(function() {
-        if ($("#sID").val() != "") {
+        if (mySessionID != "") {
             if ($("#groupSize").val() != "") {
                 socket.emit("sessionCreate", {
-                    sessionID: $("#sID").val(),
+                    sessionID: mySessionID,
                     groupSize: $("#groupSize").val()
                 });
                 
