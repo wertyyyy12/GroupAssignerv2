@@ -6,6 +6,10 @@ var io = require('socket.io')(server);
 var port = 3001;
 var data = [];
 //data (each dataCell) is stored like [sID, g#, studentList, prefs]
+function arrayRemove(array, element) {
+  var arrayCopy = JSON.parse(JSON.stringify(array));
+  return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
+}
 
 function findOptimum(groupSize, studentList, prefs) {
 
@@ -26,10 +30,7 @@ function findOptimum(groupSize, studentList, prefs) {
   
     return splitGroups;
   }
-  function arrayRemove(array, element) {
-    var arrayCopy = JSON.parse(JSON.stringify(array));
-    return arrayCopy.filter(elem => elem != element);
-  }
+
   
   function findWanting(person, prefs) { //find who wants a certain person in their group
     var people = [];
@@ -84,77 +85,79 @@ function findOptimum(groupSize, studentList, prefs) {
   }
 
   var splitGroups = splitIntoGroups(groupSize, studentList);
-  prefs.forEach((pref) => {
-    var student = pref[0];
-    var studentPrefs = pref[1];
-    var studentGroup = splitGroups.find(group => group.includes(student));
+  for (var i = 0; i < 2; i++) {
+    prefs.forEach((pref) => {
+      var student = pref[0];
+      var studentPrefs = pref[1];
+      var studentGroup = splitGroups.find(group => group.includes(student));
 
-    studentPrefs.forEach((person) => {
-      var personGroup = splitGroups.find(group => group.includes(person));
+      studentPrefs.forEach((person) => {
+        var personGroup = splitGroups.find(group => group.includes(person));
 
-      //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
-        var swapPeople = arrayRemove(personGroup, person);
+        //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
+          var swapPeople = arrayRemove(personGroup, person);
 
-        swapPeople.forEach((swapPerson) => { //for every person to swap with
-          var gain = 0;
-          //student -> A, swapPerson -> B 
-          //A group = studentGroup, B group = personGroup (same as swap group)
-          //Aprefs = studentPrefs, Bprefs = Bprefs
-          var wantingA = findWanting(student, prefs);
-          var wantingB = findWanting(swapPerson, prefs);
-          var Bprefs = findStudentPrefs(swapPerson, prefs)[1];
+          swapPeople.forEach((swapPerson) => { //for every person to swap with
+            var gain = 0;
+            //student -> A, swapPerson -> B 
+            //A group = studentGroup, B group = personGroup (same as swap group)
+            //Aprefs = studentPrefs, Bprefs = Bprefs
+            var wantingA = findWanting(student, prefs);
+            var wantingB = findWanting(swapPerson, prefs);
+            var Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
-          personGroup.forEach((Bperson) => {
-            if (wantingB.includes(Bperson)) { //someone in B's group wanted B
-              gain--;
+            personGroup.forEach((Bperson) => {
+              if (wantingB.includes(Bperson)) { //someone in B's group wanted B
+                gain--;
+              }
+
+              if (wantingA.includes(Bperson)) { //somone in B's group wants A
+                gain++;
+              }
+
+              if (Bprefs.includes(Bperson)) { //B wanted someone in group B
+                gain--;
+              }
+
+              if (studentPrefs.includes(Bperson)) { //A wants someone in B group
+                gain++;
+              }
+            });
+
+            studentGroup.forEach((Aperson) => {
+              if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+                gain--;
+              }
+
+              if (wantingB.includes(Aperson)) { //somone in A's group wants B
+                gain++;
+              }
+
+              if (studentPrefs.includes(Aperson)) { //A wanted someoen in their group
+                gain--;
+              }
+
+              if (Bprefs.includes(Aperson)) { //B wants someone in A group
+                gain++;
+              }
+            });
+
+            if (gain > 0) {
+              splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
+              //swap
             }
 
-            if (wantingA.includes(Bperson)) { //somone in B's group wants A
-              gain++;
-            }
+            // studentGroup.forEach((Aperson) => {
+            //   if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+            //     gain--;
+            //   }
+            // });
 
-            if (Bprefs.includes(Bperson)) { //B wanted someone in group B
-              gain--;
-            }
-
-            if (studentPrefs.includes(Bperson)) { //A wants someone in B group
-              gain++;
-            }
           });
-
-          studentGroup.forEach((Aperson) => {
-            if (wantingA.includes(Aperson)) { //someone in A's group wanted A
-              gain--;
-            }
-
-            if (wantingB.includes(Aperson)) { //somone in A's group wants B
-              gain++;
-            }
-
-            if (studentPrefs.includes(Aperson)) { //A wanted someoen in their group
-              gain--;
-            }
-
-            if (Bprefs.includes(Aperson)) { //B wants someone in A group
-              gain++;
-            }
-          });
-
-          if (gain > 0) {
-            splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
-            //swap
-          }
-
-          // studentGroup.forEach((Aperson) => {
-          //   if (wantingA.includes(Aperson)) { //someone in A's group wanted A
-          //     gain--;
-          //   }
-          // });
-
-        });
-        
+          
+      });
     });
-  });
+  }
 
   if (splitGroups[splitGroups.length - 1].length < 2) {
     splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
@@ -162,6 +165,18 @@ function findOptimum(groupSize, studentList, prefs) {
   }
   return splitGroups;
 }
+var testList = [1, 2, 3, 4];
+var testPrefs = [
+  [1, [2]],
+  [2, [3]],
+  [3, [4]],
+  [4, [3]]
+];
+
+
+console.log(findOptimum(2, testList, testPrefs));
+
+
 
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
@@ -195,7 +210,8 @@ function findElementInArray(array, desiredElement, subIndex) {
 io.on('connection', (socket) => {
     console.log('User connected.');
     socket.on('disconnect', () => {
-        console.log('User disconnected');
+        console.log('user disconnected');
+        console.log(data);
     });
 
     socket.on('sessionCreate', (teacherData) => {
@@ -245,6 +261,12 @@ io.on('connection', (socket) => {
 
     socket.on('endSession', (sessionID) => {
       io.emit('clientSessionEnd', sessionID);
+      var sessionData = findElementInArray(data, sessionID, 0);
+      console.log(data);
+      data = arrayRemove(data, sessionData);
+      console.log(data);
+      console.log(sessionData);
+
     });
 
     socket.on('studentSendData', (sentData) => {

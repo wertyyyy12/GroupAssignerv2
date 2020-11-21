@@ -75,7 +75,7 @@ $(document).ready(function(){
                 $("#groupSize").prop("disabled", true);
                 $("#startSession").css("display", "none");
 
-                $("#sIDindicator").html("<b>Session ID: </b>" + $("#sID").val());
+                $("#sIDindicator").html("<b>Session ID: </b>" + mySessionID);
                 $("#gSizeindicator").html("<b>Group Size: </b>" + $("#groupSize").val());
 
                 toastr.success("Session Created");
@@ -87,11 +87,16 @@ $(document).ready(function(){
     });
 
     $("#endSession").click(function() {
-        socket.emit("endSession", $("#sID").val());
-        toastr.success(`Ended Session ID "${$("#sID").val()}"`);
+        socket.emit("endSession", mySessionID);
+        toastr.success(`Ended Session ID "${mySessionID}"`);
     });
     
     $("#Back").click(function() {
         window.location.href = '/';
     });
+
+    window.onbeforeunload = function(){
+        // socket.emit("endSession", mySessionID);
+        $("#endSession").click();
+    };
 });
