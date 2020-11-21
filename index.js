@@ -165,16 +165,6 @@ function findOptimum(groupSize, studentList, prefs) {
   }
   return splitGroups;
 }
-var testList = [1, 2, 3, 4];
-var testPrefs = [
-  [1, [2]],
-  [2, [3]],
-  [3, [4]],
-  [4, [3]]
-];
-
-
-console.log(findOptimum(2, testList, testPrefs));
 
 
 
