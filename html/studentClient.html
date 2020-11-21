@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <!-- <meta name="google-signin-client_id" content="984134543663-o74ijsk609uufcapnp6isnqi8eje8a2t.apps.googleusercontent.com"> -->
     <title>Student</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <script type="text/javascript" src="http://livejs.com/live.js"></script>
+    <!-- <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://apis.google.com/js/api:client.js"></script> -->
 </head>
 <body>
-    <h2>Student - Join a session</h2>
+    <h2 id="hi">Student - Join a session</h2>
     <div class="container">
-        <input id="studentName" type="input" class="form-action" placeholder="Student Name" autocomplete="off" value="testingStudent"/>
+        <br>
+        <h4 id="studentName"></h4>
+        <!-- <input id="studentName" type="input" class="form-action" placeholder="Student Name" autocomplete="off" value="testingStudent"/> -->
         <input id="sID" type="input" class="form-action" placeholder="Session ID" autocomplete="off" value="test"/>
         <button id="joinSession" type="button" class="btn btn-primary">Join</button>
         <button type="button" class="btn btn-primary" onclick="window.location.href = '/';">Back</button>

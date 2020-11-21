@@ -1,11 +1,12 @@
 var express = require('express');
 var app = express();
-var path = require('path');
+// var path = require('path');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = 3001;
 var data = [];
-// data (each dataCell) is stored like [sID, g#, studentList, prefs]
+//data (each dataCell) is stored like [sID, g#, studentList, prefs]
+
 function findOptimum(groupSize, studentList, prefs) {
 
   function splitIntoGroups(groupSize, studentList) {

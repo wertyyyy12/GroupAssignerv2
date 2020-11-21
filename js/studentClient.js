@@ -1,8 +1,27 @@
+
+function onSignIn(googleUser) {
+    var profile = googleUser.getBasicProfile();
+    myName = profile.getName();
+    document.getElementById("hi").innerHTML = myName;
+}
+
+
 $(document).ready(function(){
+    // $("#hi").html(localStorage.getItem("studentName"));
+    var myName = localStorage.getItem("studentName");
+    $("#studentName").html(`Name: ${myName}`);
+
     var socket = io();
     var mySessionID;
-    var myName;
     var sessionData;
+
+
+    //prevents duplicate notifications from showing up (no trolling lol)
+    toastr.options = {
+        "preventDuplicates": true,
+        "preventOpenDuplicates": true
+    };
+
 
     socket.on("sessionReject", function() {
         toastr.error("Invalid Session ID");
@@ -11,7 +30,6 @@ $(document).ready(function(){
     socket.on("sessionSuccess", function(sessionID) {
         toastr.success("Joined Session ID '" + sessionID + "'");
         mySessionID = $("#sID").val();
-        myName = $("#studentName").val();
     });
 
     socket.on("updateStudentList", function(retrieved) {
@@ -73,9 +91,9 @@ $(document).ready(function(){
 
     $("#joinSession").click(function() {
         if ($("#sID").val() != "") {
-            if ($("#studentName").val() != "") {
+            if (myName != "") {
                 socket.emit("sessionJoin", {
-                    name: $("#studentName").val(),
+                    name: localStorage.getItem("studentName"),
                     sessionID: $("#sID").val()
                 });
             }
@@ -83,3 +101,4 @@ $(document).ready(function(){
     });
 
 });
+

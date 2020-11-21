@@ -1,6 +1,12 @@
 
 $(document).ready(function(){
     var socket = io();
+    
+    //prevents duplicate notifications from showing up (no trolling lol)
+    toastr.options = {
+        "preventDuplicates": true,
+        "preventOpenDuplicates": true
+    };
 
     function makeid(length) { //ty SO
         var result           = '';
