@@ -3,7 +3,7 @@ var app = express();
 // var path = require('path');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var port = 3001;
+var port = process.env.PORT || 3001;
 var data = [];
 //data (each dataCell) is stored like [sID, g#, studentList, prefs]
 function arrayRemove(array, element) {
