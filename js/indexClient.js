@@ -17,7 +17,9 @@ var googleUser = {};
     auth2.attachClickHandler(element, {},
         function(googleUser) {
           localStorage.setItem('studentName', googleUser.getBasicProfile().getName());
-          window.location.href = "./html/studentClient.html"
+          window.location.href = "./html/studentClient.html";
+        }, function(error) {
+          alert(JSON.stringify(error, undefined, 2));
         });
   }
 
