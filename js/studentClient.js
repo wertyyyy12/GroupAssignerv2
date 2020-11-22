@@ -14,6 +14,7 @@ $(document).ready(function(){
     var socket = io();
     var mySessionID;
     var sessionData;
+    var addedStudents = [];
 
 
     // //prevents duplicate notifications from showing up (no trolling lol)
@@ -37,12 +38,13 @@ $(document).ready(function(){
             retrieved.SessionData[2].forEach(studentName => {
                 console.log($(`input[name ="${studentName}"]`));
                 if (myName != studentName) {
-                    if ($(`input[name ="${studentName}"]`)){
+                    if (!addedStudents.includes(studentName)){
                         $("#studentList").append(`
                         <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
                         <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
                         `);
                         console.log($(`#${studentName}`));
+                        addedStudents.push(studentName);
                     }
                 }
             });
