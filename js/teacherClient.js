@@ -87,7 +87,10 @@ $(document).ready(function(){
     });
 
     $("#endSession").click(function() {
-        socket.emit("endSession", mySessionID);
+        socket.emit("endSession", {
+            sessionID: mySessionID,
+            disconnect: false
+        });
         toastr.success(`Ended Session ID "${mySessionID}"`);
     });
     
@@ -96,7 +99,10 @@ $(document).ready(function(){
     });
 
     window.onbeforeunload = function(){
-        // socket.emit("endSession", mySessionID);
-        $("#endSession").click();
+        socket.emit("endSession", {
+            sessionID: mySessionID,
+            disconnect: true
+        });
+        // $("#endSession").click();
     };
 });

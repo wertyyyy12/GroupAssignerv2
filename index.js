@@ -5,6 +5,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3001;
 var data = [];
+//            sessionData              [0]  [1]      [2]      [3]
 //data (each dataCell) is stored like [sID, g#, studentList, prefs]
 function arrayRemove(array, element) {
   var arrayCopy = JSON.parse(JSON.stringify(array));
@@ -249,18 +250,23 @@ io.on('connection', (socket) => {
       }
     });
 
-    socket.on('endSession', (sessionID) => {
-      io.emit('clientSessionEnd', sessionID);
-      var sessionData = findElementInArray(data, sessionID, 0);
-      console.log(data);
-      data = arrayRemove(data, sessionData);
-      console.log(data);
-      console.log(sessionData);
+    socket.on('endSession', (sentData) => {
+      var sessionID = sentData.sessionID;
+      if (!sentData.disconnect) {
+        io.emit('clientSessionEnd', sessionID);
+      }
 
+      else { //clear that session
+        var sessionData = findElementInArray(data, sessionID, 0);
+        data = arrayRemove(data, sessionData);
+      }
     });
 
     socket.on('studentSendData', (sentData) => {
       var sessionData = findElementInArray(data, sentData.sessionID, 0);
+      console.log(sentData.sessionID);
+      console.log(data);
+
       sessionData[3].push(sentData.prefs);
 
       if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
@@ -268,6 +274,9 @@ io.on('connection', (socket) => {
           sessionID: sessionData[0],
           groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
         });
+
+        var sessionData = findElementInArray(data, sentData.sessionID, 0);
+        data = arrayRemove(data, sessionData);
       }
 
       else {
@@ -291,6 +300,15 @@ io.on('connection', (socket) => {
         socket.emit("sIDvalidationResult", false); //false -> no, this sessionID is a duplicate
       }
     });
+
+    socket.on("sessionLeave", (studentData) => {
+      // var sessionData = findElementInArray(data, studentData.sessionID, 0);
+      // console.log(sessionData[2]);
+      // console.log(studentData.name);
+      // // sessionData[2] = arrayRemove(sessionData[2], studentData.name);
+      // console.log("student left");
+      // console.log(data);
+    }); //for students who disconnect while inside a session
 
 });
 

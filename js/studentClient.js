@@ -93,12 +93,19 @@ $(document).ready(function(){
         if ($("#sID").val() != "") {
             if (myName != "") {
                 socket.emit("sessionJoin", {
-                    name: localStorage.getItem("studentName"),
+                    name: myName,
                     sessionID: $("#sID").val()
                 });
             }
         }
     });
+
+    window.onbeforeunload = function() {
+        socket.emit("sessionLeave", {
+            name: myName,
+            sessionID: $("#sID").val()
+        })
+    }
 
 });
 
