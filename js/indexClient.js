@@ -18,8 +18,8 @@ var googleUser = {};
         function(googleUser) {
           localStorage.setItem('studentName', googleUser.getBasicProfile().getName());
           window.location.href = "./html/studentClient.html";
-        }, function(error) {
-          alert(JSON.stringify(error, undefined, 2));
+        // }, function(error) {
+        //   alert(JSON.stringify(error, undefined, 2));
         });
   }
 

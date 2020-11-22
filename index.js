@@ -252,13 +252,14 @@ io.on('connection', (socket) => {
 
     socket.on('endSession', (sentData) => {
       var sessionID = sentData.sessionID;
+      var sessionData = findElementInArray(data, sessionID, 0);
       if (!sentData.disconnect) {
         io.emit('clientSessionEnd', sessionID);
       }
 
-      else { //clear that session
-        var sessionData = findElementInArray(data, sessionID, 0);
+      if (sentData.disconnect || sessionData[2].length == 0) { //clear that session
         data = arrayRemove(data, sessionData);
+        console.log(data);
       }
     });
 
@@ -270,12 +271,12 @@ io.on('connection', (socket) => {
       sessionData[3].push(sentData.prefs);
 
       if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
-        io.emit('GetGroups', {
-          sessionID: sessionData[0],
-          groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
-        });
-
-        var sessionData = findElementInArray(data, sentData.sessionID, 0);
+        if (sessionData[3].length > 1) {
+          io.emit('GetGroups', {
+            sessionID: sessionData[0],
+            groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
+          });
+        }
         data = arrayRemove(data, sessionData);
       }
 

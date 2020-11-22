@@ -16,11 +16,11 @@ $(document).ready(function(){
     var sessionData;
 
 
-    //prevents duplicate notifications from showing up (no trolling lol)
-    toastr.options = {
-        "preventDuplicates": true,
-        "preventOpenDuplicates": true
-    };
+    // //prevents duplicate notifications from showing up (no trolling lol)
+    // toastr.options = {
+    //     "preventDuplicates": true,
+    //     "preventOpenDuplicates": true
+    // };
 
 
     socket.on("sessionReject", function() {
@@ -35,8 +35,9 @@ $(document).ready(function(){
     socket.on("updateStudentList", function(retrieved) {
         if (mySessionID == retrieved.SessionData[0]) {
             retrieved.SessionData[2].forEach(studentName => {
+                console.log($(`input[name ="${studentName}"]`));
                 if (myName != studentName) {
-                    if ($(`#${studentName}`).get().length == 0){
+                    if ($(`input[name ="${studentName}"]`)){
                         $("#studentList").append(`
                         <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
                         <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
