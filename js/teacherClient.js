@@ -52,7 +52,7 @@ $(document).ready(function(){
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
-                <h3>Group ${index + 1}: </h3>
+                <h3>Group ${index + 1} </h3>
                 <ul id="GroupList${index + 1}"></ul>
                 `);
 
@@ -98,7 +98,7 @@ $(document).ready(function(){
         window.location.href = '/';
     });
 
-    window.onbeforeunload = function(){
+    window.onunload = function() {
         socket.emit("endSession", {
             sessionID: mySessionID,
             disconnect: true

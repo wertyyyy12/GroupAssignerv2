@@ -253,14 +253,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('endSession', (sentData) => {
+      console.log(`ending session ${sentData.sessionID}`);
       var sessionID = sentData.sessionID;
       var sessionData = findElementInArray(data, sessionID, 0);
-      if (!sentData.disconnect) {
-        io.emit('clientSessionEnd', sessionID);
+      if (!sentData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
+        io.emit('clientSessionEnd', {
+          sessionID: sessionID,
+          disconnect: false
+        });
       }
 
-      if (sentData.disconnect || sessionData[2].length == 0) { //clear that session
-        data = arrayRemove(data, sessionData);
+      else {
+        if (sentData.disconnect || sessionData[2].length == 0) { //clear that session if disconncected OR no students
+          data = arrayRemove(data, sessionData);
+        }
+
+        io.emit('clientSessionEnd', {
+          sessionID: sessionID,
+          disconnect: true
+        });
       }
     });
 
@@ -301,14 +312,12 @@ io.on('connection', (socket) => {
       }
     });
 
-    socket.on("sessionLeave", (studentData) => {
-      // var sessionData = findElementInArray(data, studentData.sessionID, 0);
-      // console.log(sessionData[2]);
-      // console.log(studentData.name);
-      // // sessionData[2] = arrayRemove(sessionData[2], studentData.name);
-      // console.log("student left");
-      // console.log(data);
-    }); //for students who disconnect while inside a session
+    socket.on("sessionLeave", (studentData) => { //for students who disconnect while inside a session
+      var sessionData = findElementInArray(data, studentData.sessionID, 0);
+      if (sessionData) {
+        sessionData[2] = arrayRemove(sessionData[2], studentData.name);
+      }
+    }); 
 
 });
 

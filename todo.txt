@@ -6,7 +6,7 @@
 -additional backwards pass on group making alg?
 -notify the teacher if there is a group with extra members
 -strict max teacher group setting
--max student choices
 -duplicate login prevention
 -make number field for teacher more "smart"
     -not allowing 1 or any other non-number to exist
+-reset teacher, student GUIs after the session ends

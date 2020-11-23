@@ -16,6 +16,7 @@ $(document).ready(function(){
 
     var sessionData;
     var addedStudents = [];
+    var sessionEnded = false;
 
     var myMaxStudents;
     var selections = 0;
@@ -95,23 +96,35 @@ $(document).ready(function(){
         }
     });
 
-    socket.on("clientSessionEnd", function(sessionID) {
-        if (mySessionID == sessionID) {
-            var myPrefs = []; //prepare to send data to server
-            $("input[type=checkbox]").each(function() {
-                if ($(this).is(":checked")) {
-                    myPrefs.push($(this).val());
+    socket.on("clientSessionEnd", function(data) { //data: sessionID, disconnect
+        var sessionID = data.sessionID;
+        if (mySessionID == sessionID) { //if this event is for me, the person that entered the session
+            if (!data.disconnect) {
+                    var myPrefs = []; //prepare to send data to server
+                    $("input[type=checkbox]").each(function() {
+                        if ($(this).is(":checked")) {
+                            myPrefs.push($(this).val());
+                        }
+                    });
+
+                    console.log(myPrefs);
+                    socket.emit("studentSendData", {
+                        prefs: [myName, myPrefs],
+                        sessionID: mySessionID
+                    });
+                    toastr.info("This session has ended.");
+                    sessionEnded = true;
+            }
+
+            else { //this session was a result of teacher disconnect
+                if (!sessionEnded) { //if the session has not already ended by normal means
+                    toastr.info("Session aborted by teacher.");
+                    setTimeout(function() { location.reload(); }, 1500);
                 }
-            });
-
-            console.log(myPrefs);
-            socket.emit("studentSendData", {
-                prefs: [myName, myPrefs],
-                sessionID: mySessionID
-            });
-            toastr.info("This session has ended.");
-
+            }
         }
+
+
     });
 
     socket.on("GetGroups", function(data) {
@@ -119,7 +132,7 @@ $(document).ready(function(){
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
-                <h3>Group ${index + 1}: </h3>
+                <h3>Group ${index + 1} </h3>
                 <ul id="GroupList${index + 1}"></ul>
                 `);
 
@@ -142,7 +155,7 @@ $(document).ready(function(){
         }
     });
 
-    window.onbeforeunload = function() {
+    window.onunload = function() {
         socket.emit("sessionLeave", {
             name: myName,
             sessionID: $("#sID").val()
