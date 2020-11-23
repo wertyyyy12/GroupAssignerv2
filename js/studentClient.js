@@ -2,8 +2,8 @@
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
     myName = profile.getName();
-    document.getElementById("hi").innerHTML = myName;
 }
+
 
 
 $(document).ready(function(){
@@ -13,8 +13,12 @@ $(document).ready(function(){
 
     var socket = io();
     var mySessionID;
+
     var sessionData;
     var addedStudents = [];
+
+    var myMaxStudents;
+    var selections = 0;
 
 
     // //prevents duplicate notifications from showing up (no trolling lol)
@@ -28,9 +32,13 @@ $(document).ready(function(){
         toastr.error("Invalid Session ID");
     });
 
-    socket.on("sessionSuccess", function(sessionID) {
-        toastr.success("Joined Session ID '" + sessionID + "'");
-        mySessionID = $("#sID").val();
+    socket.on("sessionSuccess", function(data) {
+        toastr.success("Joined Session ID '" + data.sessionID + "'");
+        mySessionID = data.sessionID;
+
+        myMaxStudents = data.maxSelections;
+        $("#maxStudents").html(`Select a maximum of ${data.maxSelections} students.`);
+
     });
 
     socket.on("updateStudentList", function(retrieved) {
@@ -43,7 +51,28 @@ $(document).ready(function(){
                         <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
                         <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
                         `);
-                        console.log($(`#${studentName}`));
+
+                        console.log(document.getElementById(`${studentName}`));
+                        
+                        document.getElementById(`${studentName}`).addEventListener("click", function() {
+
+                            if (this.checked) {
+                                selections++;
+                                if (selections > myMaxStudents) {
+                                    this.checked = false;
+                                    toastr.warning("Max student selections reached");
+                                    selections--;
+                                }
+                            }
+
+                            else if (!this.checked){
+                                selections--;   
+                            }
+
+                           
+
+                            
+                        });
                         addedStudents.push(studentName);
                     }
                 }
@@ -58,7 +87,7 @@ $(document).ready(function(){
 
     socket.on("clientSessionEnd", function(sessionID) {
         if (mySessionID == sessionID) {
-            var myPrefs = [];
+            var myPrefs = []; //prepare to send data to server
             $("input[type=checkbox]").each(function() {
                 if ($(this).is(":checked")) {
                     myPrefs.push($(this).val());

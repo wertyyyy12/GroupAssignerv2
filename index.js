@@ -202,7 +202,6 @@ io.on('connection', (socket) => {
     console.log('User connected.');
     socket.on('disconnect', () => {
         console.log('user disconnected');
-        console.log(data);
     });
 
     socket.on('sessionCreate', (teacherData) => {
@@ -213,7 +212,10 @@ io.on('connection', (socket) => {
       var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
       if (sessionData) {
         sessionData[2].push(studentData.name);
-        socket.emit('sessionSuccess', studentData.sessionID);
+        socket.emit('sessionSuccess', {
+          sessionID: studentData.sessionID,
+          maxSelections: Math.ceil(sessionData[1]/2)
+        });
         io.emit('updateStudentList', {
           SessionData: sessionData, 
           name: studentData.name
@@ -259,14 +261,11 @@ io.on('connection', (socket) => {
 
       if (sentData.disconnect || sessionData[2].length == 0) { //clear that session
         data = arrayRemove(data, sessionData);
-        console.log(data);
       }
     });
 
     socket.on('studentSendData', (sentData) => {
       var sessionData = findElementInArray(data, sentData.sessionID, 0);
-      console.log(sentData.sessionID);
-      console.log(data);
 
       sessionData[3].push(sentData.prefs);
 
