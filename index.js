@@ -211,44 +211,49 @@ io.on('connection', (socket) => {
     socket.on('sessionJoin', (studentData) => {
       var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
       if (sessionData) {
-        sessionData[2].push(studentData.name);
-        socket.emit('sessionSuccess', {
-          sessionID: studentData.sessionID,
-          maxSelections: Math.ceil(sessionData[1]/2)
-        });
-        io.emit('updateStudentList', {
-          SessionData: sessionData, 
-          name: studentData.name
-        });
+        if (!sessionData[2].includes(studentData.name)) {
+          sessionData[2].push(studentData.name);
+          socket.emit('sessionSuccess', {
+            sessionID: studentData.sessionID,
+            maxSelections: Math.ceil(sessionData[1]/2)
+          });
+          io.emit('updateStudentList', {
+            SessionData: sessionData, 
+            name: studentData.name
+          });
 
 
-        var leftOverStudents = sessionData[2].length % sessionData[1];
-        if (leftOverStudents != 0) {
-          if (sessionData[2].length >= sessionData[1]) {
-            var violationGroupSize;
-            if (leftOverStudents == 1) {
-              violationGroupSize = parseInt(sessionData[1]) + 1;
+          var leftOverStudents = sessionData[2].length % sessionData[1];
+          if (leftOverStudents != 0) {
+            if (sessionData[2].length >= sessionData[1]) {
+              var violationGroupSize;
+              if (leftOverStudents == 1) {
+                violationGroupSize = parseInt(sessionData[1]) + 1;
+              }
+
+              else if (leftOverStudents > 1) {
+                violationGroupSize = leftOverStudents;
+              }
+
+              socket.broadcast.emit('potentialViolation', { //tells teachers to update student leftover counters
+                violation: true,
+                sessionID: studentData.sessionID,
+                leftOver: violationGroupSize
+              });
             }
-
-            else if (leftOverStudents > 1) {
-              violationGroupSize = leftOverStudents;
-            }
-
-            socket.broadcast.emit('potentialViolation', { //tells teachers to update student leftover counters
-              violation: true,
-              sessionID: studentData.sessionID,
-              leftOver: violationGroupSize
-            });
           }
-        }
 
-        else {
-          socket.broadcast.emit('potentialViolation', {violation: false});
-        }
+          else {
+            socket.broadcast.emit('potentialViolation', {violation: false});
+          }
+          }
+
+          else {
+            socket.emit('sessionReject', 'duplicateLogin');
+          }
       }
-
       else {
-        socket.emit('sessionReject');
+        socket.emit('sessionReject', 'invalidSessionID');
       }
     });
 

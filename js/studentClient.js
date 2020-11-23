@@ -29,8 +29,15 @@ $(document).ready(function(){
     // };
 
 
-    socket.on("sessionReject", function() {
-        toastr.error("Invalid Session ID");
+    socket.on("sessionReject", function(reason) {
+        console.log(reason);
+        if (reason == "invalidSessionID") {
+            toastr.error("Invalid Session ID");
+        }
+
+        else if (reason == "duplicateLogin") {
+            toastr.warning("Duplicate login blocked");
+        }
     });
 
     socket.on("sessionSuccess", function(data) {
