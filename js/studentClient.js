@@ -59,47 +59,51 @@ $(document).ready(function(){
 
     });
 
-    socket.on("updateStudentList", function(retrieved) {
-        if (mySessionID == retrieved.SessionData[0]) {
-            retrieved.SessionData[2].forEach(studentName => {
-                console.log($(`input[name ="${studentName}"]`));
-                if (myName != studentName) {
-                    if (!addedStudents.includes(studentName)){
-                        $("#studentList").append(`
-                        <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
-                        <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
-                        `);
+    socket.on("updateStudentList", function(data) { //data: sessionData, name, type
+        if (mySessionID == data.sessionData[0]) {
+            if (data.type == "add") {
+                data.sessionData[2].forEach(studentName => {
+                    console.log($(`input[name ="${studentName}"]`));
+                    if (myName != studentName) {
+                        if (!addedStudents.includes(studentName)){
+                            $("#studentList").append(`
+                            <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
+                            <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
+                            `);
+                            
+                            document.getElementById(`${studentName}`).addEventListener("click", function() {
 
-                        console.log(document.getElementById(`${studentName}`));
-                        
-                        document.getElementById(`${studentName}`).addEventListener("click", function() {
-
-                            if (this.checked) {
-                                selections++;
-                                if (selections > myMaxStudents) {
-                                    this.checked = false;
-                                    toastr.warning("Max student selections reached");
-                                    selections--;
+                                if (this.checked) {
+                                    selections++;
+                                    if (selections > myMaxStudents) {
+                                        this.checked = false;
+                                        toastr.warning("Max student selections reached");
+                                        selections--;
+                                    }
                                 }
-                            }
 
-                            else if (!this.checked){
-                                selections--;   
-                            }
-
-                           
+                                else if (!this.checked){
+                                    selections--;   
+                                }
 
                             
-                        });
-                        addedStudents.push(studentName);
+
+                                
+                            });
+                            addedStudents.push(studentName);
+                        }
                     }
-                }
-            });
+                });
 
-            // socket.emit("Get", mySessionID);
-            //asdasdasdasd
-            $("#joinSession").prop("disabled", true);
+                // socket.emit("Get", mySessionID);
+                //asdasdasdasd
+                $("#joinSession").prop("disabled", true);
+            }
 
+            if (data.type == "remove") {
+                $(`input[id="${data.name}"]`).remove();
+                $(`label[for = "${data.name}"]`).remove();
+            }
         }
     });
 

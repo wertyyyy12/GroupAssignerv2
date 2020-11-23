@@ -218,8 +218,9 @@ io.on('connection', (socket) => {
             maxSelections: Math.ceil(sessionData[1]/2)
           });
           io.emit('updateStudentList', {
-            SessionData: sessionData, 
-            name: studentData.name
+            sessionData: sessionData, 
+            name: studentData.name,
+            type: 'add'
           });
 
 
@@ -322,6 +323,12 @@ io.on('connection', (socket) => {
       if (sessionData) {
         sessionData[2] = arrayRemove(sessionData[2], studentData.name);
       }
+
+      io.emit('updateStudentList', {
+        sessionData: sessionData, 
+        name: studentData.name,
+        type: 'remove'
+      });
     }); 
 
 });

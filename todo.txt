@@ -10,3 +10,4 @@
 -make number field for teacher more "smart"
     -not allowing 1 or any other non-number to exist
 -reset teacher, student GUIs after the session ends
+-switch to sessionStorage
