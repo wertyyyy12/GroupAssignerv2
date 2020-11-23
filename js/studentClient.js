@@ -8,7 +8,7 @@ function onSignIn(googleUser) {
 
 $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
-    var myName = localStorage.getItem("studentName");
+    var myName = sessionStorage.getItem("studentName");
     $("#studentName").html(`Name: ${myName}`);
 
     var socket = io();

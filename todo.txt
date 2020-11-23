@@ -3,8 +3,6 @@
     -teacher view student prefrences in real time Oo-o
 -notify if a student has not chosen anyone?
 -"ready" button on student end, teacher be able to see how many students are ready
--additional backwards pass on group making alg?
--notify the teacher if there is a group with extra members
 -strict max teacher group setting
 -duplicate login prevention
 -make number field for teacher more "smart"

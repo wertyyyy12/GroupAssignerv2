@@ -1,5 +1,5 @@
 
-function findOptimum(groupSize, studentList, prefs) {
+function findOptimum(groupSize, studentList, prefs) { //add double pass
 
   function splitIntoGroups(groupSize, studentList) {
     var numGroups = Math.ceil(studentList.length / groupSize);
