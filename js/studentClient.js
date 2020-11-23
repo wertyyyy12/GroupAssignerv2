@@ -37,7 +37,17 @@ $(document).ready(function(){
         mySessionID = data.sessionID;
 
         myMaxStudents = data.maxSelections;
-        $("#maxStudents").html(`Select a maximum of ${data.maxSelections} students.`);
+        if (data.maxSelections == 1) { 
+            $("#maxStudents").html(`Select a maximum of 1 student.`);
+        }
+
+        else {
+            $("#maxStudents").html(`Select a maximum of ${myMaxStudents} students.`);
+        }
+
+
+
+        
 
     });
 
