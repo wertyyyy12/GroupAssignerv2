@@ -223,6 +223,10 @@ io.on('connection', (socket) => {
             type: 'add'
           });
 
+          socket.broadcast.emit('updateTeacherInfo', { //tells teachers to update student leftover counters
+            studentList: sessionData[2],
+            sessionID: studentData.sessionID
+          });
 
           var leftOverStudents = sessionData[2].length % sessionData[1];
           if (leftOverStudents != 0) {
@@ -236,7 +240,7 @@ io.on('connection', (socket) => {
                 violationGroupSize = leftOverStudents;
               }
 
-              socket.broadcast.emit('potentialViolation', { //tells teachers to update student leftover counters
+              socket.broadcast.emit('updateTeacherInfo', { //tells teachers to update student leftover counters
                 violation: true,
                 sessionID: studentData.sessionID,
                 leftOver: violationGroupSize
@@ -245,7 +249,10 @@ io.on('connection', (socket) => {
           }
 
           else {
-            socket.broadcast.emit('potentialViolation', {violation: false});
+            socket.broadcast.emit('updateTeacherInfo', {
+              violation: false,
+              sessionID: studentData.sessionID
+            });
           }
           }
 

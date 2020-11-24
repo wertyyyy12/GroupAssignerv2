@@ -35,16 +35,38 @@ $(document).ready(function(){
     });
 
 
-    socket.on("potentialViolation", function(data) {
-        if (data.violation) {
-            if (data.sessionID == mySessionID) {
+    socket.on("updateTeacherInfo", function(data) {
+        if (data.sessionID == mySessionID) {
+            if (data.violation) {
                 $("#groupSizeViolation").html(`There will be a group with ${data.leftOver} students with the current student list.`);
             }
-        }
 
-        else {
-            $("#groupSizeViolation").html(`All groups have ${$("#groupSize").val()} students.`);
-        }
+            else {
+                $("#groupSizeViolation").html(`All groups have ${$("#groupSize").val()} students.`);
+            }
+
+
+            if (data.studentList) {
+                $("#studentList").html("");
+                data.studentList.forEach((student) => {
+                    $("#studentList").append(`<li>${student}</li>`);
+                });
+
+                if (data.studentList.length > 1) {
+                    $("#numStudents").html(`<b>${data.studentList.length}</b> students joined.`);
+                }
+                else if (data.studentList.length == 1) {
+                    $("#numStudents").html("<b>1</b> student joined.");
+                }
+
+                if ($("#studentListHeading").html() == "") {
+                    $("#studentListHeading").html("Students:");
+                }
+
+
+            }
+    }
+
     });
 
     socket.on("GetGroups", function(data) {

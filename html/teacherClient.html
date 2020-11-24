@@ -12,7 +12,7 @@
     <div id="container">
         <h2 id="teacherHeading">Teacher - Manage a session</h2>
         <h4 id="sID" value="test"></h4>
-        <input id="groupSize" type="number" class="form-action" placeholder="Max Group Size" autocomplete="off" value="2"/>
+        <input id="groupSize" type="number" class="form-action" placeholder="Group Size" autocomplete="off" autofocus/>
         <button id="startSession" type="button" class="btn btn-primary">Start Session</button>
         <button id="endSession" type="button" class="btn btn-danger" style="display: none;">End Session</button>
         <button id="Back" type="button" class="btn btn-primary">Back</button>
@@ -25,6 +25,10 @@
     </div>
     <div id="container">
         <h5 id="groupSizeViolation"></h5>
+        <br>
+        <h5 id="numStudents"></h5>
+        <h5 id="studentListHeading"></h5>
+        <ul id="studentList"></ul>
     </div>
     <br><br>
     <div id="groupsList" class="container"></div>

@@ -9,3 +9,6 @@
     -not allowing 1 or any other non-number to exist
 -reset teacher, student GUIs after the session ends
 -switch to sessionStorage
+-save student list(?)
+-copy button for sessionID
+-make other redundant sID indicator go away upon session creation for teacher
