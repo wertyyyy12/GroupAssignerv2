@@ -7,6 +7,9 @@ function onSignIn(googleUser) {
 $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
     var myName = sessionStorage.getItem("studentName");
+    if (!myName) {
+        window.location.href = "./"
+    }
     $("#studentName").html(`Name: ${myName}`);
 
     var socket = io();
