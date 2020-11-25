@@ -1,6 +1,8 @@
 
 $(document).ready(function(){
     var socket = io();
+    var studentsReady = 0;
+    var readyList = [];
     
     //prevents duplicate notifications from showing up (no trolling lol)
     toastr.options = {
@@ -9,8 +11,8 @@ $(document).ready(function(){
     };
 
     function makeid(length) { //ty SO
-        var result           = '';
-        var characters       = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        var result           = "";
+        var characters       = "abcdefghijklmnopqrstuvwxyz0123456789";
         var charactersLength = characters.length;
         for ( var i = 0; i < length; i++ ) {
            result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -46,8 +48,8 @@ $(document).ready(function(){
             }
 
 
-            if (data.studentList) {
-                $("#studentList").html("");
+            if (data.studentList) { //refresh student list (delete all and rebuild with additional data)
+                $("#studentList").empty();
                 data.studentList.forEach((student) => {
                     $("#studentList").append(`<li>${student}</li>`);
                 });
@@ -63,7 +65,36 @@ $(document).ready(function(){
                     $("#studentListHeading").html("Students:");
                 }
 
+                //recolor any students who are ready
+                readyList.forEach((readyStudent) => {
+                    $(`li:contains(${readyStudent})`).css("color", "green");
+                });
 
+            }
+
+            if (data.type == "readyUp") {
+                studentsReady++;
+                if (studentsReady > 1) {
+                    $("#numStudentsReady").html(`<b>${studentsReady}</b> students ready.`);
+                }
+
+                else if (studentsReady == 1) {
+                    $("#numStudentsReady").html("<b>1</b> student ready.");
+                }
+
+                $(`li:contains(${data.name})`).css("color", "green");
+                readyList.push(data.name);
+            }
+
+            if (data.type == "studentLeave") {
+                studentsReady--;
+                if (studentsReady > 1) {
+                    $("#numStudentsReady").html(`<b>${studentsReady}</b> students ready.`);
+                }
+
+                else if (studentsReady == 1) {
+                    $("#numStudentsReady").html("<b>1</b> student ready.");
+                }
             }
     }
 
@@ -103,6 +134,7 @@ $(document).ready(function(){
                 toastr.success("Session Created");
 
                 $("#endSession").css("display", "inline");
+                $("#sID").css("display", "none");
 
             }
         }

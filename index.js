@@ -1,8 +1,8 @@
-var express = require('express');
+var express = require("express");
 var app = express();
-// var path = require('path');
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+// var path = require("path");
+var server = require("http").createServer(app);
+var io = require("socket.io")(server);
 var port = process.env.PORT || 3001;
 var data = [];
 //            sessionData              [0]  [1]      [2]      [3]
@@ -95,7 +95,7 @@ function findOptimum(groupSize, studentList, prefs) {
       studentPrefs.forEach((person) => {
         var personGroup = splitGroups.find(group => group.includes(person));
 
-        //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
+        //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
           var swapPeople = arrayRemove(personGroup, person);
 
           swapPeople.forEach((swapPerson) => { //for every person to swap with
@@ -108,11 +108,11 @@ function findOptimum(groupSize, studentList, prefs) {
             var Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
             personGroup.forEach((Bperson) => {
-              if (wantingB.includes(Bperson)) { //someone in B's group wanted B
+              if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
                 gain--;
               }
 
-              if (wantingA.includes(Bperson)) { //somone in B's group wants A
+              if (wantingA.includes(Bperson)) { //somone in B"s group wants A
                 gain++;
               }
 
@@ -126,11 +126,11 @@ function findOptimum(groupSize, studentList, prefs) {
             });
 
             studentGroup.forEach((Aperson) => {
-              if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+              if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
                 gain--;
               }
 
-              if (wantingB.includes(Aperson)) { //somone in A's group wants B
+              if (wantingB.includes(Aperson)) { //somone in A"s group wants B
                 gain++;
               }
 
@@ -149,7 +149,7 @@ function findOptimum(groupSize, studentList, prefs) {
             }
 
             // studentGroup.forEach((Aperson) => {
-            //   if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+            //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
             //     gain--;
             //   }
             // });
@@ -167,18 +167,16 @@ function findOptimum(groupSize, studentList, prefs) {
   return splitGroups;
 }
 
-
-
 server.listen(port, () => {
-  console.log('Server listening at port %d', port);
+  console.log("Server listening at port %d", port);
 });
 
 
-app.use(express.static(__dirname + '/html'));
-app.use('/html', express.static(__dirname + '/html'));
+app.use(express.static(__dirname + "/html"));
+app.use("/html", express.static(__dirname + "/html"));
 
-app.use(express.static(__dirname + '/js'));
-app.use('/js', express.static(__dirname + '/js'));
+app.use(express.static(__dirname + "/js"));
+app.use("/js", express.static(__dirname + "/js"));
 
 function findElementInArray(array, desiredElement, subIndex) {
   var found = false;
@@ -198,32 +196,32 @@ function findElementInArray(array, desiredElement, subIndex) {
   return found;
 }
 
-io.on('connection', (socket) => {
-    console.log('User connected.');
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
+io.on("connection", (socket) => {
+    console.log("User connected.");
+    socket.on("disconnect", () => {
+        console.log("user disconnected");
     });
 
-    socket.on('sessionCreate', (teacherData) => {
+    socket.on("sessionCreate", (teacherData) => {
       data.push([teacherData.sessionID, teacherData.groupSize, [], []]);
     });
 
-    socket.on('sessionJoin', (studentData) => {
+    socket.on("sessionJoin", (studentData) => {
       var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
       if (sessionData) {
         if (!sessionData[2].includes(studentData.name)) {
           sessionData[2].push(studentData.name);
-          socket.emit('sessionSuccess', {
+          socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
             maxSelections: Math.ceil(sessionData[1]/2)
           });
-          io.emit('updateStudentList', {
+          io.emit("updateStudentList", {
             sessionData: sessionData, 
             name: studentData.name,
-            type: 'add'
+            type: "add"
           });
 
-          socket.broadcast.emit('updateTeacherInfo', { //tells teachers to update student leftover counters
+          socket.broadcast.emit("updateTeacherInfo", { //tells teachers to update student leftover counters
             studentList: sessionData[2],
             sessionID: studentData.sessionID
           });
@@ -240,7 +238,7 @@ io.on('connection', (socket) => {
                 violationGroupSize = leftOverStudents;
               }
 
-              socket.broadcast.emit('updateTeacherInfo', { //tells teachers to update student leftover counters
+              socket.broadcast.emit("updateTeacherInfo", { //tells teachers to update student leftover counters
                 violation: true,
                 sessionID: studentData.sessionID,
                 leftOver: violationGroupSize
@@ -249,7 +247,7 @@ io.on('connection', (socket) => {
           }
 
           else {
-            socket.broadcast.emit('updateTeacherInfo', {
+            socket.broadcast.emit("updateTeacherInfo", {
               violation: false,
               sessionID: studentData.sessionID
             });
@@ -257,20 +255,20 @@ io.on('connection', (socket) => {
           }
 
           else {
-            socket.emit('sessionReject', 'duplicateLogin');
+            socket.emit("sessionReject", "duplicateLogin");
           }
       }
       else {
-        socket.emit('sessionReject', 'invalidSessionID');
+        socket.emit("sessionReject", "invalidSessionID");
       }
     });
 
-    socket.on('endSession', (sentData) => {
+    socket.on("endSession", (sentData) => {
       console.log(`ending session ${sentData.sessionID}`);
       var sessionID = sentData.sessionID;
       var sessionData = findElementInArray(data, sessionID, 0);
       if (!sentData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
-        io.emit('clientSessionEnd', {
+        io.emit("clientSessionEnd", {
           sessionID: sessionID,
           disconnect: false
         });
@@ -281,21 +279,21 @@ io.on('connection', (socket) => {
           data = arrayRemove(data, sessionData);
         }
 
-        io.emit('clientSessionEnd', {
+        io.emit("clientSessionEnd", {
           sessionID: sessionID,
           disconnect: true
         });
       }
     });
 
-    socket.on('studentSendData', (sentData) => {
+    socket.on("studentSendData", (sentData) => {
       var sessionData = findElementInArray(data, sentData.sessionID, 0);
 
       sessionData[3].push(sentData.prefs);
 
       if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
         if (sessionData[3].length > 1) {
-          io.emit('GetGroups', {
+          io.emit("GetGroups", {
             sessionID: sessionData[0],
             groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
           });
@@ -331,12 +329,26 @@ io.on('connection', (socket) => {
         sessionData[2] = arrayRemove(sessionData[2], studentData.name);
       }
 
-      io.emit('updateStudentList', {
+      io.emit("updateStudentList", {
         sessionData: sessionData, 
         name: studentData.name,
-        type: 'remove'
+        type: "remove"
       });
-    }); 
+
+      socket.broadcast.emit("updateTeacherInfo", {
+        sessionID: studentData.sessionID,
+        studentList: sessionData[2],
+        type: "studentLeave"
+      });
+    });
+    
+    socket.on("studentReady", (studentData) => { //when a student ready up
+      socket.broadcast.emit("updateTeacherInfo", {
+        sessionID: studentData.sessionID,
+        name: studentData.name,
+        type: "readyUp" 
+      });
+    });
 
 });
 

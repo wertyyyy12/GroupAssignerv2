@@ -19,19 +19,29 @@
     </div>
 
     <div id="container">
-        <h4 id="sIDindicator"></h4>
-        <h4 id="gSizeindicator"></h4>
-        <h4 id="instructions"></h4>
+        <h4 id="sIDindicator" class="ml-2"></h4>
+        <h4 id="gSizeindicator" class="ml-2"></h4>
+        <!-- <h4 id="instructions"></h4> -->
     </div>
     <div id="container">
-        <h5 id="groupSizeViolation"></h5>
+        <h5 id="groupSizeViolation" class="ml-2"></h5>
         <br>
-        <h5 id="numStudents"></h5>
-        <h5 id="studentListHeading"></h5>
-        <ul id="studentList"></ul>
+        <div class="row">
+            <div class="col-sm-2">
+                <h5 id="numStudents" class="ml-2"></h5>
+                <h5 id="studentListHeading" class="ml-2"></h5>
+                <ul id="studentList" class="ml-2"></ul>
+            </div>
+
+            <div class="col-sm-2">
+                <h5 id="numStudentsReady" style="color: green;"></h5>
+            </div>
+
+            <div id="groupsList" class="col">
+                
+            </div>
+        </div>
     </div>
-    <br><br>
-    <div id="groupsList" class="container"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

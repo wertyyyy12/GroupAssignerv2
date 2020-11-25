@@ -4,8 +4,6 @@ function onSignIn(googleUser) {
     myName = profile.getName();
 }
 
-
-
 $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
     var myName = sessionStorage.getItem("studentName");
@@ -17,6 +15,7 @@ $(document).ready(function(){
     var sessionData;
     var addedStudents = [];
     var sessionEnded = false;
+    var ready = false;
 
     var myMaxStudents;
     var selections = 0;
@@ -30,7 +29,6 @@ $(document).ready(function(){
 
 
     socket.on("sessionReject", function(reason) {
-        console.log(reason);
         if (reason == "invalidSessionID") {
             toastr.error("Invalid Session ID");
         }
@@ -53,7 +51,7 @@ $(document).ready(function(){
             $("#maxStudents").html(`Select a maximum of ${myMaxStudents} students.`);
         }
 
-
+        $("#selectionReady").css("display", "inline");
 
         
 
@@ -63,13 +61,16 @@ $(document).ready(function(){
         if (mySessionID == data.sessionData[0]) {
             if (data.type == "add") {
                 data.sessionData[2].forEach(studentName => {
-                    console.log($(`input[name ="${studentName}"]`));
                     if (myName != studentName) {
                         if (!addedStudents.includes(studentName)){
                             $("#studentList").append(`
                             <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
                             <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
                             `);
+
+                            if (ready) {
+                                document.getElementById(`${studentName}`).disabled = true;
+                            }
                             
                             document.getElementById(`${studentName}`).addEventListener("click", function() {
 
@@ -117,14 +118,15 @@ $(document).ready(function(){
                             myPrefs.push($(this).val());
                         }
                     });
-
-                    console.log(myPrefs);
                     socket.emit("studentSendData", {
                         prefs: [myName, myPrefs],
                         sessionID: mySessionID
                     });
                     toastr.info("This session has ended.");
                     sessionEnded = true;
+                    $("#studentList").empty();
+                    $("#maxStudents").empty();
+                    $("#selectionReady").prop("disabled", true);
             }
 
             else { //this session was a result of teacher disconnect
@@ -166,11 +168,31 @@ $(document).ready(function(){
         }
     });
 
+    $("#selectionReady").click(function() {
+        $("#selectionReady").prop("disabled", true); //disable the button itself
+        socket.emit("studentReady", { //tell the server to tell the teacher that the student is ready
+            sessionID: mySessionID,
+            name: myName
+        });
+
+        $("input[type=checkbox]").each(function() {
+            $(this).prop("disabled", true);
+            if ($(this).is(":checked")) {
+                var checkedLabel = $(`label[for="${$(this).attr("id")}"]`)
+                checkedLabel.css("color", "green");
+                checkedLabel.css("font-weight", "bold");
+            }
+        });
+
+        ready = true;
+
+    }); 
+
     window.onunload = function() {
         socket.emit("sessionLeave", {
             name: myName,
             sessionID: $("#sID").val()
-        })
+        });
     }
 
 });

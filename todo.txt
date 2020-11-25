@@ -4,11 +4,11 @@
 -notify if a student has not chosen anyone?
 -"ready" button on student end, teacher be able to see how many students are ready
 -strict max teacher group setting
--duplicate login prevention
 -make number field for teacher more "smart"
     -not allowing 1 or any other non-number to exist
 -reset teacher, student GUIs after the session ends
--switch to sessionStorage
--save student list(?)
+-save student list (?)
 -copy button for sessionID
--make other redundant sID indicator go away upon session creation for teacher
+-sanity check for oAuth on student page
+-all groups have 2 students but there is only 1 student?
+-teacher modify student selections
