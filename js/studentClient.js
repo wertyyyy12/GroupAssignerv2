@@ -2,6 +2,7 @@
 $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
     var myName = sessionStorage.getItem("studentName");
+    var idToken = sessionStorage.getItem("userToken");
     if (!myName) {
         window.location.href = "./";
     }
@@ -25,14 +26,13 @@ $(document).ready(function(){
     //     "preventOpenDuplicates": true
     // };
 
-
     socket.on("sessionReject", function(reason) {
         if (reason == "invalidSessionID") {
             toastr.error("Invalid Session ID");
         }
 
-        else if (reason == "duplicateLogin") {
-            toastr.warning("Duplicate login blocked");
+        else if (reason == "invalidUser") {
+            toastr.warning("Invalid User");
         }
     });
 
@@ -160,7 +160,8 @@ $(document).ready(function(){
             if (myName != "") {
                 socket.emit("sessionJoin", {
                     name: myName,
-                    sessionID: $("#sID").val()
+                    sessionID: $("#sID").val(),
+                    token: idToken
                 });
             }
         }

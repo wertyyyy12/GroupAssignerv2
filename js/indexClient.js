@@ -20,7 +20,7 @@ var googleUser = {};
         function(googleUser) {
           sessionStorage.setItem('studentName', googleUser.getBasicProfile().getName());
           var id_token = googleUser.getAuthResponse().id_token;
-          socket.emit("oAuthValidate", id_token);
+          sessionStorage.setItem('userToken', id_token);
           window.location.href = "./html/studentClient.html";
         // }, function(error) {
         //   alert(JSON.stringify(error, undefined, 2));
