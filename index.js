@@ -4,6 +4,11 @@ var app = express();
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var port = process.env.PORT || 3001;
+
+const {OAuth2Client} = require('google-auth-library');
+const clientID = "984134543663-o74ijsk609uufcapnp6isnqi8eje8a2t.apps.googleusercontent.com" 
+const client = new OAuth2Client(clientID);
+
 var data = [];
 //            sessionData              [0]  [1]      [2]      [3]
 //data (each dataCell) is stored like [sID, g#, studentList, prefs]
@@ -348,6 +353,23 @@ io.on("connection", (socket) => {
         name: studentData.name,
         type: "readyUp" 
       });
+    });
+
+    socket.on("oAuthValidate", (token) => {
+      console.log("Hhihih");
+      async function verify() {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: clientID,  // Specify the CLIENT_ID of the app that accesses the backend
+            // Or, if multiple clients access the backend:
+            //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+        });
+        const payload = ticket.getPayload();
+        const userid = payload['sub'];
+        // If request specified a G Suite domain:
+        // const domain = payload['hd'];
+      }
+      verify().catch(console.error);
     });
 
 });

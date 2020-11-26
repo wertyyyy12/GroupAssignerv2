@@ -1,14 +1,9 @@
 
-function onSignIn(googleUser) {
-    var profile = googleUser.getBasicProfile();
-    myName = profile.getName();
-}
-
 $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
     var myName = sessionStorage.getItem("studentName");
     if (!myName) {
-        window.location.href = "./"
+        window.location.href = "./";
     }
     $("#studentName").html(`Name: ${myName}`);
 
