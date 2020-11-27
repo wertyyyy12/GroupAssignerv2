@@ -118,7 +118,8 @@ $(document).ready(function(){
                     });
                     socket.emit("studentSendData", {
                         prefs: [myName, myPrefs],
-                        sessionID: mySessionID
+                        sessionID: mySessionID,
+                        token: idToken
                     });
                     toastr.info("This session has ended.");
                     sessionEnded = true;

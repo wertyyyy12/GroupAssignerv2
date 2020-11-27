@@ -10,22 +10,15 @@ const clientID = "984134543663-o74ijsk609uufcapnp6isnqi8eje8a2t.apps.googleuserc
 const client = new OAuth2Client(clientID);
 
 async function verify(token) {
-  try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: clientID,  // Specify the CLIENT_ID of the app that accesses the backend
-      // Or, if multiple clients access the backend:
-      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-    });
-    const payload = ticket.getPayload();
-    const userid = payload['sub'];
-    return userid;
-  }
-
-  catch {
-    console.log("invalid token!");
-    return false;
-  }
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: clientID,  // Specify the CLIENT_ID of the app that accesses the backend
+    // Or, if multiple clients access the backend:
+    //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+  });
+  const payload = ticket.getPayload();
+  const userid = payload['sub'];
+  return userid;
   // If request specified a G Suite domain:
   // const domain = payload['hd'];
 }
@@ -246,8 +239,8 @@ io.on("connection", (socket) => {
     if (sessionData) {
       verify(studentData.token).then((userID) => {
         if (userID && !sessionData[4]["sessionJoin"].includes(userID)) { //if (the result of the validation returned a userID) AND (sessionJoin array doesnt already have the user in it)
-
           sessionData[2].push(studentData.name);
+          sessionData[4]["sessionJoin"].push(userID);
           console.log(userID);
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
@@ -258,8 +251,6 @@ io.on("connection", (socket) => {
             name: studentData.name,
             type: "add"
           });
-
-          sessionData[4]["sessionJoin"].push(userID);
 
           socket.broadcast.emit("updateTeacherInfo", { //tells teachers to update student leftover counters
             studentList: sessionData[2],
@@ -295,10 +286,8 @@ io.on("connection", (socket) => {
 
 
         }
-
-        else {
-          socket.emit("sessionReject", "invalidUser");
-        }
+      }).catch(() => {
+        socket.emit("sessionReject", "invalidUser");
       });
     }
 
@@ -333,6 +322,7 @@ io.on("connection", (socket) => {
   socket.on("studentSendData", (sentData) => {
     var sessionData = findElementInArray(data, sentData.sessionID, 0);
 
+    verify(sentData.token).then()
     sessionData[3].push(sentData.prefs);
 
     if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
