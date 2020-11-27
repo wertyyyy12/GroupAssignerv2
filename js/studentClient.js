@@ -5,8 +5,8 @@ $(document).ready(function(){
     var idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    sessionStorage.removeItem("userToken");
-    sessionStorage.removeItem("studentName");
+    // sessionStorage.removeItem("userToken");
+    // sessionStorage.removeItem("studentName");
 
     if (!myName) {
         window.location.href = "/";
@@ -32,6 +32,11 @@ $(document).ready(function(){
     //     "preventDuplicates": true,
     //     "preventOpenDuplicates": true
     // };
+
+    function arrayRemove(array, element) {
+        var arrayCopy = JSON.parse(JSON.stringify(array));
+        return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
+    }
 
     socket.on("sessionReject", function(reason) {
         if (reason == "invalidSessionID") {
@@ -108,7 +113,10 @@ $(document).ready(function(){
 
             if (data.type == "remove") {
                 $(`input[id="${data.name}"]`).remove();
+                $(`label[for = "${data.name}"] + br`).remove(); //remove the br after the label cuz apparently that is there
                 $(`label[for = "${data.name}"]`).remove();
+
+                addedStudents = arrayRemove(addedStudents, data.name);
             }
         }
     });

@@ -22,13 +22,11 @@ async function verify(token) {
 
   // If request specified a G Suite domain:
   const domain = payload['hd'];
-  if (domain != "my.cuhsd.org") {
-    throw Invalid_Domain;
-  }
+  // if (domain != "my.cuhsd.org") {
+  //   throw Invalid_Domain;
+  // }
 
-  else {
-    return userid;
-  }
+  return userid;
 }
 
 var data = [];
@@ -248,7 +246,7 @@ io.on("connection", (socket) => {
       verify(studentData.token).then((userID) => {
         if (!sessionData[4]["sessionJoin"].includes(userID)) { //if (sessionJoin array doesnt already have the user in it)
           sessionData[2].push(studentData.name);
-          sessionData[4]["sessionJoin"].push(userID);
+          sessionData[4].sessionJoin.push(userID);
           sessionData[4].sessionLeave = arrayRemove(sessionData[4].sessionLeave, userID);
           console.log(userID);
           socket.emit("sessionSuccess", {
@@ -383,7 +381,10 @@ io.on("connection", (socket) => {
         var currentActionArray = sessionData[4].sessionLeave;
         if (!currentActionArray.includes(userID)) {
           currentActionArray.push(userID);
+          //remove the student id from all student actions; they left so they should be able to do them again
           sessionData[4].sessionJoin = arrayRemove(sessionData[4].sessionJoin, userID);
+          sessionData[4].studentSendData = arrayRemove(sessionData[4].studentSendData, userID);
+          sessionData[4].studentReady = arrayRemove(sessionData[4].studentReady, userID);
           io.emit("updateStudentList", {
             sessionData: sessionData,
             name: studentData.name,
@@ -393,6 +394,7 @@ io.on("connection", (socket) => {
           socket.broadcast.emit("updateTeacherInfo", {
             sessionID: studentData.sessionID,
             studentList: sessionData[2],
+            name: studentData.name,
             type: "studentLeave"
           });
         }
@@ -414,6 +416,11 @@ io.on("connection", (socket) => {
             name: studentData.name,
             type: "readyUp"
           });
+        }
+
+        else {
+          console.log("diplicate reayd");
+          console.log(currentActionArray);
         }
       }).catch(() => {
         socket.emit("sessionReject", "invalidUserAction");
