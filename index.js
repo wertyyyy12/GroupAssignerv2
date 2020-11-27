@@ -1,3 +1,4 @@
+const { rejects } = require("assert");
 var express = require("express");
 var app = express();
 // var path = require("path");
@@ -18,9 +19,16 @@ async function verify(token) {
   });
   const payload = ticket.getPayload();
   const userid = payload['sub'];
-  return userid;
+
   // If request specified a G Suite domain:
-  // const domain = payload['hd'];
+  const domain = payload['hd'];
+  if (domain != "my.cuhsd.org") {
+    throw Invalid_Domain;
+  }
+
+  else {
+    return userid;
+  }
 }
 
 var data = [];
@@ -388,6 +396,8 @@ io.on("connection", (socket) => {
             type: "studentLeave"
           });
         }
+      }).catch(() => {
+        socket.emit("sessionReject", "invalidUserAction");
       });
     }
   });
@@ -405,6 +415,8 @@ io.on("connection", (socket) => {
             type: "readyUp"
           });
         }
+      }).catch(() => {
+        socket.emit("sessionReject", "invalidUserAction");
       });
     }
   });
