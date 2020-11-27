@@ -238,9 +238,10 @@ io.on("connection", (socket) => {
     var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
     if (sessionData) {
       verify(studentData.token).then((userID) => {
-        if (userID && !sessionData[4]["sessionJoin"].includes(userID)) { //if (the result of the validation returned a userID) AND (sessionJoin array doesnt already have the user in it)
+        if (!sessionData[4]["sessionJoin"].includes(userID)) { //if (sessionJoin array doesnt already have the user in it)
           sessionData[2].push(studentData.name);
           sessionData[4]["sessionJoin"].push(userID);
+          sessionData[4].sessionLeave = arrayRemove(sessionData[4].sessionLeave, userID);
           console.log(userID);
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
@@ -287,7 +288,7 @@ io.on("connection", (socket) => {
 
         }
       }).catch(() => {
-        socket.emit("sessionReject", "invalidUser");
+        socket.emit("sessionReject", "invalidUserAction");
       });
     }
 
@@ -321,22 +322,31 @@ io.on("connection", (socket) => {
 
   socket.on("studentSendData", (sentData) => {
     var sessionData = findElementInArray(data, sentData.sessionID, 0);
+    if (sessionData) {
+      verify(sentData.token).then((userID) => {
+        var currentActionArray = sessionData[4].studentSendData;
+        if (!currentActionArray.includes(userID)) {
+          sessionData[3].push(sentData.prefs);
+          sessionData[4].studentSendData.push(userID);
 
-    verify(sentData.token).then()
-    sessionData[3].push(sentData.prefs);
+          if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
+            if (sessionData[3].length > 1) {
+              io.emit("GetGroups", {
+                sessionID: sessionData[0],
+                groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
+              });
+            }
+            data = arrayRemove(data, sessionData);
+          }
 
-    if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
-      if (sessionData[3].length > 1) {
-        io.emit("GetGroups", {
-          sessionID: sessionData[0],
-          groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
+          else {
+            console.log("data not ready.");
+          }
+        }
+      })
+        .catch(() => {
+          socket.emit("sessionReject", "invalidUserAction");
         });
-      }
-      data = arrayRemove(data, sessionData);
-    }
-
-    else {
-      console.log("data not ready.");
     }
   });
 
@@ -361,27 +371,42 @@ io.on("connection", (socket) => {
     var sessionData = findElementInArray(data, studentData.sessionID, 0);
     if (sessionData) {
       sessionData[2] = arrayRemove(sessionData[2], studentData.name);
+      verify(studentData.token).then((userID) => {
+        var currentActionArray = sessionData[4].sessionLeave;
+        if (!currentActionArray.includes(userID)) {
+          currentActionArray.push(userID);
+          sessionData[4].sessionJoin = arrayRemove(sessionData[4].sessionJoin, userID);
+          io.emit("updateStudentList", {
+            sessionData: sessionData,
+            name: studentData.name,
+            type: "remove"
+          });
+
+          socket.broadcast.emit("updateTeacherInfo", {
+            sessionID: studentData.sessionID,
+            studentList: sessionData[2],
+            type: "studentLeave"
+          });
+        }
+      });
     }
-
-    io.emit("updateStudentList", {
-      sessionData: sessionData,
-      name: studentData.name,
-      type: "remove"
-    });
-
-    socket.broadcast.emit("updateTeacherInfo", {
-      sessionID: studentData.sessionID,
-      studentList: sessionData[2],
-      type: "studentLeave"
-    });
   });
 
   socket.on("studentReady", (studentData) => { //when a student ready up
-    socket.broadcast.emit("updateTeacherInfo", {
-      sessionID: studentData.sessionID,
-      name: studentData.name,
-      type: "readyUp"
-    });
+    var sessionData = findElementInArray(data, studentData.sessionID, 0);
+    if (sessionData) {
+      verify(studentData.token).then((userID) => {
+        var currentActionArray = sessionData[4].studentReady;
+        if (!currentActionArray.includes(userID)) {
+          currentActionArray.push(userID);
+          socket.broadcast.emit("updateTeacherInfo", {
+            sessionID: studentData.sessionID,
+            name: studentData.name,
+            type: "readyUp"
+          });
+        }
+      });
+    }
   });
 
 

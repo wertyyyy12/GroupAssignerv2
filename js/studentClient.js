@@ -3,10 +3,17 @@ $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
     var myName = sessionStorage.getItem("studentName");
     var idToken = sessionStorage.getItem("userToken");
+
+    //makes tampering with these values a fair bit harder; not impossible though
+    sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("studentName");
+
     if (!myName) {
-        window.location.href = "./";
+        window.location.href = "/";
     }
-    $("#studentName").html(`Name: ${myName}`);
+    else {
+        $("#studentName").html(`Name: ${myName}`);
+    }
 
     var socket = io();
     var mySessionID;
@@ -31,8 +38,8 @@ $(document).ready(function(){
             toastr.error("Invalid Session ID");
         }
 
-        else if (reason == "invalidUser") {
-            toastr.warning("Invalid User");
+        else if (reason == "invalidUserAction") {
+            toastr.warning("Invalid User Action");
         }
     });
 
@@ -172,7 +179,8 @@ $(document).ready(function(){
         $("#selectionReady").prop("disabled", true); //disable the button itself
         socket.emit("studentReady", { //tell the server to tell the teacher that the student is ready
             sessionID: mySessionID,
-            name: myName
+            name: myName,
+            token: idToken
         });
 
         $("input[type=checkbox]").each(function() {
@@ -191,7 +199,8 @@ $(document).ready(function(){
     window.onunload = function() {
         socket.emit("sessionLeave", {
             name: myName,
-            sessionID: $("#sID").val()
+            sessionID: $("#sID").val(),
+            token: idToken
         });
     }
 
