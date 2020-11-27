@@ -82,7 +82,7 @@ $(document).ready(function(){
                                 document.getElementById(`${studentName}`).disabled = true;
                             }
                             
-                            document.getElementById(`${studentName}`).addEventListener("click", function() {
+                            document.getElementById(`${studentName}`).addEventListener("click", function() { //for some reason the jquery equivalent starts acting up when i give it this so 
 
                                 if (this.checked) {
                                     selections++;
@@ -96,8 +96,6 @@ $(document).ready(function(){
                                 else if (!this.checked){
                                     selections--;   
                                 }
-
-                            
 
                                 
                             });
