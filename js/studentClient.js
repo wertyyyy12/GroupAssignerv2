@@ -5,12 +5,16 @@ $(document).ready(function(){
     var idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    // sessionStorage.removeItem("userToken");
-    // sessionStorage.removeItem("studentName");
+    sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("studentName");
+
+    //jsut in case
+    sessionStorage.removeItem("teacherName");
 
     if (!myName) {
         window.location.href = "/";
     }
+
     else {
         $("#studentName").html(`Name: ${myName}`);
     }
@@ -18,7 +22,6 @@ $(document).ready(function(){
     var socket = io();
     var mySessionID;
 
-    var sessionData;
     var addedStudents = [];
     var sessionEnded = false;
     var ready = false;
@@ -43,9 +46,14 @@ $(document).ready(function(){
             toastr.error("Invalid Session ID");
         }
 
+        else if (reason == "duplicateLogin") {
+            toastr.warning("Duplicate login blocked");
+        }
+
         else if (reason == "invalidUserAction") {
             toastr.warning("Invalid User Action");
         }
+
     });
 
     socket.on("sessionSuccess", function(data) {

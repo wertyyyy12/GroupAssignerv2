@@ -228,16 +228,21 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sessionCreate", (teacherData) => {
-    var templateUserActions = {
-      //tracks who has done what action (w/ subject IDs from tokens)
-      "sessionJoin": [],
-      "studentSendData": [],
-      "sessionLeave": [],
-      "studentReady": [],
-      //only person authorized to do teacher actions
-      "teacher": []
-    }
-    data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions]);
+    verify(teacherData.token).then((userID) => {
+      var templateUserActions = {
+        //tracks who has done what action (w/ subject IDs from tokens)
+        "sessionJoin": [],
+        "studentSendData": [],
+        "sessionLeave": [],
+        "studentReady": [],
+        //only person authorized to do teacher actions
+        "teacher": userID
+      }
+      console.log("teacher set as " + userID);
+      data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions]);
+    }).catch(() => {
+      console.log("invalid teacher attempt");
+    });
   });
 
   socket.on("sessionJoin", (studentData) => {
@@ -293,6 +298,10 @@ io.on("connection", (socket) => {
 
 
         }
+
+        else {
+          socket.emit("sessionReject", "duplicateLogin")
+        }
       }).catch(() => {
         socket.emit("sessionReject", "invalidUserAction");
       });
@@ -303,27 +312,34 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("endSession", (sentData) => {
-    console.log(`ending session ${sentData.sessionID}`);
-    var sessionID = sentData.sessionID;
+  socket.on("endSession", (teacherData) => {
+    var sessionID = teacherData.sessionID;
     var sessionData = findElementInArray(data, sessionID, 0);
-    if (!sentData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
-      io.emit("clientSessionEnd", {
-        sessionID: sessionID,
-        disconnect: false
-      });
-    }
+    verify(teacherData.token).then((userID) => {
+      if (sessionData[4].teacher == userID) {
+        console.log(`ending session ${teacherData.sessionID}`);
 
-    else {
-      if (sentData.disconnect || sessionData[2].length == 0) { //clear that session if disconncected OR no students
-        data = arrayRemove(data, sessionData);
+        if (!teacherData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
+          io.emit("clientSessionEnd", {
+            sessionID: sessionID,
+            disconnect: false
+          });
+        }
+
+        else {
+          if (teacherData.disconnect || sessionData[2].length == 0) { //clear that session if disconncected OR no students
+            data = arrayRemove(data, sessionData);
+          }
+
+          io.emit("clientSessionEnd", {
+            sessionID: sessionID,
+            disconnect: true
+          });
+        }
       }
-
-      io.emit("clientSessionEnd", {
-        sessionID: sessionID,
-        disconnect: true
-      });
-    }
+    }).catch(() => {
+      console.log("invalid teacher action");
+    });
   });
 
   socket.on("studentSendData", (sentData) => {

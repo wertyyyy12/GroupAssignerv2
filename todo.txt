@@ -13,7 +13,3 @@
 -all groups have 2 students but there is only 1 student?
 -teacher modify student selections
 -fix ready count bug
-
-
-ON PRODUCTION:
-    -obfusciate
