@@ -19,14 +19,17 @@ async function verify(token) {
   });
   const payload = ticket.getPayload();
   const userid = payload['sub'];
-
+  const username = payload['name'];
   // If request specified a G Suite domain:
   const domain = payload['hd'];
   // if (domain != "my.cuhsd.org") {
   //   throw Invalid_Domain;
   // }
 
-  return userid;
+  return {
+    userID: userid, 
+    name: username
+  };
 }
 
 var data = [];
@@ -228,7 +231,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sessionCreate", (teacherData) => {
-    verify(teacherData.token).then((userID) => {
+    verify(teacherData.token).then((payload) => {
       var templateUserActions = {
         //tracks who has done what action (w/ subject IDs from tokens)
         "sessionJoin": [],
@@ -236,9 +239,9 @@ io.on("connection", (socket) => {
         "sessionLeave": [],
         "studentReady": [],
         //only person authorized to do teacher actions
-        "teacher": userID
+        "teacher": payload.userID
       }
-      console.log("teacher set as " + userID);
+      console.log("teacher set as " + payload.userID);
       data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions]);
     }).catch(() => {
       console.log("invalid teacher attempt");
@@ -248,19 +251,19 @@ io.on("connection", (socket) => {
   socket.on("sessionJoin", (studentData) => {
     var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
     if (sessionData) {
-      verify(studentData.token).then((userID) => {
-        if (!sessionData[4]["sessionJoin"].includes(userID)) { //if (sessionJoin array doesnt already have the user in it)
-          sessionData[2].push(studentData.name);
-          sessionData[4].sessionJoin.push(userID);
-          sessionData[4].sessionLeave = arrayRemove(sessionData[4].sessionLeave, userID);
-          console.log(userID);
+      verify(studentData.token).then((payload) => {
+        if (!sessionData[4]["sessionJoin"].includes(payload.userID)) { //if (sessionJoin array doesnt already have the user in it)
+          sessionData[2].push(payload.name);
+          sessionData[4].sessionJoin.push(payload.userID);
+          sessionData[4].sessionLeave = arrayRemove(sessionData[4].sessionLeave, payload.userID);
+          console.log(payload.userID);
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
             maxSelections: Math.ceil(sessionData[1] / 2)
           });
           io.emit("updateStudentList", {
             sessionData: sessionData,
-            name: studentData.name,
+            name: payload.name,
             type: "add"
           });
 
@@ -315,8 +318,8 @@ io.on("connection", (socket) => {
   socket.on("endSession", (teacherData) => {
     var sessionID = teacherData.sessionID;
     var sessionData = findElementInArray(data, sessionID, 0);
-    verify(teacherData.token).then((userID) => {
-      if (sessionData[4].teacher == userID) {
+    verify(teacherData.token).then((payload) => {
+      if (sessionData[4].teacher == payload.userID) {
         console.log(`ending session ${teacherData.sessionID}`);
 
         if (!teacherData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
@@ -345,11 +348,11 @@ io.on("connection", (socket) => {
   socket.on("studentSendData", (sentData) => {
     var sessionData = findElementInArray(data, sentData.sessionID, 0);
     if (sessionData) {
-      verify(sentData.token).then((userID) => {
+      verify(sentData.token).then((payload) => {
         var currentActionArray = sessionData[4].studentSendData;
-        if (!currentActionArray.includes(userID)) {
+        if (!currentActionArray.includes(payload.userID)) {
           sessionData[3].push(sentData.prefs);
-          sessionData[4].studentSendData.push(userID);
+          sessionData[4].studentSendData.push(payload.userID);
 
           if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
             if (sessionData[3].length > 1) {
@@ -392,25 +395,25 @@ io.on("connection", (socket) => {
   socket.on("sessionLeave", (studentData) => { //for students who disconnect while inside a session
     var sessionData = findElementInArray(data, studentData.sessionID, 0);
     if (sessionData) {
-      sessionData[2] = arrayRemove(sessionData[2], studentData.name);
-      verify(studentData.token).then((userID) => {
+      verify(studentData.token).then((payload) => {
+        sessionData[2] = arrayRemove(sessionData[2], payload.name);
         var currentActionArray = sessionData[4].sessionLeave;
-        if (!currentActionArray.includes(userID)) {
-          currentActionArray.push(userID);
+        if (!currentActionArray.includes(payload.userID)) {
+          currentActionArray.push(payload.userID);
           //remove the student id from all student actions; they left so they should be able to do them again
-          sessionData[4].sessionJoin = arrayRemove(sessionData[4].sessionJoin, userID);
-          sessionData[4].studentSendData = arrayRemove(sessionData[4].studentSendData, userID);
-          sessionData[4].studentReady = arrayRemove(sessionData[4].studentReady, userID);
+          sessionData[4].sessionJoin = arrayRemove(sessionData[4].sessionJoin, payload.userID);
+          sessionData[4].studentSendData = arrayRemove(sessionData[4].studentSendData, payload.userID);
+          sessionData[4].studentReady = arrayRemove(sessionData[4].studentReady, payload.userID);
           io.emit("updateStudentList", {
             sessionData: sessionData,
-            name: studentData.name,
+            name: payload.name,
             type: "remove"
           });
 
           socket.broadcast.emit("updateTeacherInfo", {
             sessionID: studentData.sessionID,
             studentList: sessionData[2],
-            name: studentData.name,
+            name: payload.name,
             type: "studentLeave"
           });
         }
@@ -423,13 +426,13 @@ io.on("connection", (socket) => {
   socket.on("studentReady", (studentData) => { //when a student ready up
     var sessionData = findElementInArray(data, studentData.sessionID, 0);
     if (sessionData) {
-      verify(studentData.token).then((userID) => {
+      verify(studentData.token).then((payload) => {
         var currentActionArray = sessionData[4].studentReady;
-        if (!currentActionArray.includes(userID)) {
-          currentActionArray.push(userID);
+        if (!currentActionArray.includes(payload.userID)) {
+          currentActionArray.push(payload.userID);
           socket.broadcast.emit("updateTeacherInfo", {
             sessionID: studentData.sessionID,
-            name: studentData.name,
+            name: payload.name,
             type: "readyUp"
           });
         }

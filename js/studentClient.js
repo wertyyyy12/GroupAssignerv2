@@ -196,7 +196,6 @@ $(document).ready(function(){
         if ($("#sID").val() != "") {
             if (myName != "") {
                 socket.emit("sessionJoin", {
-                    name: myName,
                     sessionID: $("#sID").val(),
                     token: idToken
                 });
@@ -208,7 +207,6 @@ $(document).ready(function(){
         $("#selectionReady").prop("disabled", true); //disable the button itself
         socket.emit("studentReady", { //tell the server to tell the teacher that the student is ready
             sessionID: mySessionID,
-            name: myName,
             token: idToken
         });
 
@@ -228,7 +226,6 @@ $(document).ready(function(){
     window.onunload = function() {
         if (inSession) {
             socket.emit("sessionLeave", {
-                name: myName,
                 sessionID: $("#sID").val(),
                 token: idToken
             });
