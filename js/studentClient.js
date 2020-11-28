@@ -25,6 +25,7 @@ $(document).ready(function(){
     var addedStudents = [];
     var sessionEnded = false;
     var ready = false;
+    var inSession = false;
 
     var myMaxStudents;
     var selections = 0;
@@ -59,6 +60,7 @@ $(document).ready(function(){
     socket.on("sessionSuccess", function(data) {
         toastr.success("Joined Session ID '" + data.sessionID + "'");
         mySessionID = data.sessionID;
+        inSession = true;
 
         myMaxStudents = data.maxSelections;
         if (data.maxSelections == 1) { 
@@ -78,6 +80,8 @@ $(document).ready(function(){
     socket.on("updateStudentList", function(data) { //data: sessionData, name, type
         if (mySessionID == data.sessionData[0]) {
             if (data.type == "add") {
+                console.log("adding student list: ")
+                console.log(data.sessionData[2]);
                 data.sessionData[2].forEach(studentName => {
                     if (myName != studentName) {
                         if (!addedStudents.includes(studentName)){
@@ -111,6 +115,15 @@ $(document).ready(function(){
                             });
                             addedStudents.push(studentName);
                         }
+
+                        else {
+                            console.log("student already addded");
+                            console.log(addedStudents);
+                        }
+                    }
+
+                    else {
+                        console.log("skipped over my own name: " + myName);
                     }
                 });
 
@@ -213,11 +226,13 @@ $(document).ready(function(){
     }); 
 
     window.onunload = function() {
-        socket.emit("sessionLeave", {
-            name: myName,
-            sessionID: $("#sID").val(),
-            token: idToken
-        });
+        if (inSession) {
+            socket.emit("sessionLeave", {
+                name: myName,
+                sessionID: $("#sID").val(),
+                token: idToken
+            });
+        }
     }
 
 });
