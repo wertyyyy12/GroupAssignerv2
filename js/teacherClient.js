@@ -3,7 +3,25 @@ $(document).ready(function () {
     var socket = io();
     var studentsReady = 0;
     var readyList = [];
+    var myName = sessionStorage.getItem("teacherName");
+    var idToken = sessionStorage.getItem("userToken");
 
+    //temporary diversion to avoid tampering (by no means impossible)
+    sessionStorage.removeItem("teacherName");
+    sessionStorage.removeItem("userToken");
+
+    //just in case
+    sessionStorage.removeItem("studentName");
+
+    if (!myName) {
+        window.location.href = "/";
+    }
+
+    else {
+        $("#teacherName").html(`Teacher Name: ${myName}`);
+    }
+
+    
     //prevents duplicate notifications from showing up (no trolling lol)
     toastr.options = {
         "preventDuplicates": true,
@@ -135,7 +153,8 @@ $(document).ready(function () {
             if ($("#groupSize").val() != "") {
                 socket.emit("sessionCreate", {
                     sessionID: mySessionID,
-                    groupSize: $("#groupSize").val()
+                    groupSize: $("#groupSize").val(),
+                    token: idToken
                 });
 
                 $("#sID").prop("disabled", true);
@@ -157,7 +176,8 @@ $(document).ready(function () {
     $("#endSession").click(function () {
         socket.emit("endSession", {
             sessionID: mySessionID,
-            disconnect: false
+            disconnect: false,
+            token: idToken
         });
         toastr.success(`Ended Session ID "${mySessionID}"`);
     });
@@ -169,7 +189,8 @@ $(document).ready(function () {
     window.onunload = function () {
         socket.emit("endSession", {
             sessionID: mySessionID,
-            disconnect: true
+            disconnect: true,
+            token: idToken
         });
         // $("#endSession").click();
     };
