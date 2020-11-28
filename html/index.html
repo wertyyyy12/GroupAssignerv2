@@ -22,16 +22,10 @@
         <button type="button" class="btn btn-primary" id="studentBtn">Student</button>
     </div>
     <div class="d-flex justify-content-center"> 
-        <button type="button" class="btn btn-primary mt-3" onclick="teacherLogin()">Teacher</button>
+        <button type="button" class="btn btn-primary mt-3" id="teacherBtn">Teacher</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
-        function teacherLogin() {
-            window.location.href = "./html/teacherClient.html";
-        }
-    </script>
 
     <!-- Driver client side script -->
     <script src="/js/indexClient.js"></script>

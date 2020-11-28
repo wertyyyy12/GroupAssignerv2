@@ -10,18 +10,27 @@ var googleUser = {};
         // Request scopes in addition to 'profile' and 'email'
         //scope: 'additional_scope'
       });
-      attachSignin(document.getElementById('studentBtn'));
+      attachSignin(document.getElementById('teacherBtn'), "teacher");
+      attachSignin(document.getElementById('studentBtn'), "student");
+
     });
   };
 
-  function attachSignin(element) {
-    console.log(element.id);
+  function attachSignin(element, type) {
     auth2.attachClickHandler(element, {},
         function(googleUser) {
-          sessionStorage.setItem('studentName', googleUser.getBasicProfile().getName());
+          if (type == "student") {
+            sessionStorage.setItem('studentName', googleUser.getBasicProfile().getName());
+            window.location.href = "./html/studentClient.html";
+          }
+
+          if (type == "teacher") {
+            sessionStorage.setItem('teacherName', googleUser.getBasicProfile().getName());
+            window.location.href = "./html/teacherClient.html";
+          }
+
           var id_token = googleUser.getAuthResponse().id_token;
           sessionStorage.setItem('userToken', id_token);
-          window.location.href = "./html/studentClient.html";
         // }, function(error) {
         //   alert(JSON.stringify(error, undefined, 2));
         });

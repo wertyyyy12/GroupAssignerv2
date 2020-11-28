@@ -5,12 +5,16 @@ $(document).ready(function(){
     var idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    // sessionStorage.removeItem("userToken");
-    // sessionStorage.removeItem("studentName");
+    sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("studentName");
+
+    //jsut in case
+    sessionStorage.removeItem("teacherName");
 
     if (!myName) {
         window.location.href = "/";
     }
+
     else {
         $("#studentName").html(`Name: ${myName}`);
     }
@@ -18,10 +22,10 @@ $(document).ready(function(){
     var socket = io();
     var mySessionID;
 
-    var sessionData;
     var addedStudents = [];
     var sessionEnded = false;
     var ready = false;
+    var inSession = false;
 
     var myMaxStudents;
     var selections = 0;
@@ -43,14 +47,20 @@ $(document).ready(function(){
             toastr.error("Invalid Session ID");
         }
 
+        else if (reason == "duplicateLogin") {
+            toastr.warning("Duplicate login blocked");
+        }
+
         else if (reason == "invalidUserAction") {
             toastr.warning("Invalid User Action");
         }
+
     });
 
     socket.on("sessionSuccess", function(data) {
         toastr.success("Joined Session ID '" + data.sessionID + "'");
         mySessionID = data.sessionID;
+        inSession = true;
 
         myMaxStudents = data.maxSelections;
         if (data.maxSelections == 1) { 
@@ -70,6 +80,8 @@ $(document).ready(function(){
     socket.on("updateStudentList", function(data) { //data: sessionData, name, type
         if (mySessionID == data.sessionData[0]) {
             if (data.type == "add") {
+                console.log("adding student list: ")
+                console.log(data.sessionData[2]);
                 data.sessionData[2].forEach(studentName => {
                     if (myName != studentName) {
                         if (!addedStudents.includes(studentName)){
@@ -101,6 +113,15 @@ $(document).ready(function(){
                             });
                             addedStudents.push(studentName);
                         }
+
+                        else {
+                            console.log("student already addded");
+                            console.log(addedStudents);
+                        }
+                    }
+
+                    else {
+                        console.log("skipped over my own name: " + myName);
                     }
                 });
 
@@ -173,7 +194,6 @@ $(document).ready(function(){
         if ($("#sID").val() != "") {
             if (myName != "") {
                 socket.emit("sessionJoin", {
-                    name: myName,
                     sessionID: $("#sID").val(),
                     token: idToken
                 });
@@ -185,7 +205,6 @@ $(document).ready(function(){
         $("#selectionReady").prop("disabled", true); //disable the button itself
         socket.emit("studentReady", { //tell the server to tell the teacher that the student is ready
             sessionID: mySessionID,
-            name: myName,
             token: idToken
         });
 
@@ -203,11 +222,12 @@ $(document).ready(function(){
     }); 
 
     window.onunload = function() {
-        socket.emit("sessionLeave", {
-            name: myName,
-            sessionID: $("#sID").val(),
-            token: idToken
-        });
+        if (inSession) {
+            socket.emit("sessionLeave", {
+                sessionID: $("#sID").val(),
+                token: idToken
+            });
+        }
     }
 
 });
