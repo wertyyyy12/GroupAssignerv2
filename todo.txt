@@ -1,8 +1,5 @@
 -teacher should also be able to view group selections
     -teacher view student prefrences in real time Oo-o
--make number field for teacher more "smart"
-    -not allowing 1 or any other non-number to exist
--reset teacher, student GUIs after the session ends
 -save student list (?)
 -copy button for sessionID
 -all groups have 2 students but there is only 1 student?
@@ -15,3 +12,6 @@ ASK:
 
 ON PRODUCTION:
     -change procfile to "node index.js"
+    -bring back domain restrictions
+    -switch to sessionStorage
+    -bring back null redirects/clearing sessionStorage keys

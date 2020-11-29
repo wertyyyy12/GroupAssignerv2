@@ -22,12 +22,13 @@ async function verify(token, type) {
   const userid = payload['sub'];
   const username = payload['name'];
   // If request specified a G Suite domain:
-  if (type == "student") {
-    const domain = payload['hd'];
-    if (domain != "my.cuhsd.org") {
-      throw Invalid_Domain;
-    }
-  }
+  
+  // if (type == "student") {
+  //   const domain = payload['hd'];
+  //   if (domain != "my.cuhsd.org") {
+  //     throw Invalid_Domain;
+  //   }
+  // }
 
   return {
     userID: userid, 
@@ -264,7 +265,7 @@ io.on("connection", (socket) => {
           sessionData[2].push(payload.name);
           sessionData[4].sessionJoin.push(payload.userID);
           sessionData[4].sessionLeave = arrayRemove(sessionData[4].sessionLeave, payload.userID);
-          console.log(payload.userID);
+          console.log("student user ID " + payload.userID + "joined");
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
             maxSelections: Math.ceil(sessionData[1] / 2)
@@ -281,6 +282,8 @@ io.on("connection", (socket) => {
           });
 
           var leftOverStudents = sessionData[2].length % sessionData[1];
+          console.log(leftOverStudents);
+          console.log(sessionData[2].length);
           if (leftOverStudents != 0) {
             if (sessionData[2].length >= sessionData[1]) {
               var violationGroupSize;
