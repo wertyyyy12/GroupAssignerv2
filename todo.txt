@@ -1,8 +1,5 @@
--xss filtering
 -teacher should also be able to view group selections
     -teacher view student prefrences in real time Oo-o
--notify if a student has not chosen anyone?
--"ready" button on student end, teacher be able to see how many students are ready
 -strict max teacher group setting
 -make number field for teacher more "smart"
     -not allowing 1 or any other non-number to exist
@@ -11,4 +8,10 @@
 -copy button for sessionID
 -all groups have 2 students but there is only 1 student?
 -teacher modify student selections
--link tokens to name
+-domain restrictions
+
+ASK:
+    -teacher add absent students
+
+ON PRODUCTION:
+    -change procfile to "node index.js"

@@ -10,7 +10,7 @@ const { OAuth2Client } = require('google-auth-library');
 const clientID = "984134543663-o74ijsk609uufcapnp6isnqi8eje8a2t.apps.googleusercontent.com"
 const client = new OAuth2Client(clientID);
 
-async function verify(token) {
+async function verify(token, type) {
   const ticket = await client.verifyIdToken({
     idToken: token,
     audience: clientID,  // Specify the CLIENT_ID of the app that accesses the backend
@@ -21,10 +21,12 @@ async function verify(token) {
   const userid = payload['sub'];
   const username = payload['name'];
   // If request specified a G Suite domain:
-  const domain = payload['hd'];
-  // if (domain != "my.cuhsd.org") {
-  //   throw Invalid_Domain;
-  // }
+  if (type == "student") {
+    const domain = payload['hd'];
+    if (domain != "my.cuhsd.org") {
+      throw Invalid_Domain;
+    }
+  }
 
   return {
     userID: userid, 
@@ -251,7 +253,7 @@ io.on("connection", (socket) => {
   socket.on("sessionJoin", (studentData) => {
     var sessionData = findElementInArray(data, studentData.sessionID, 0); //find sessionID in data at [0] of element
     if (sessionData) {
-      verify(studentData.token).then((payload) => {
+      verify(studentData.token, "student").then((payload) => {
         if (!sessionData[4]["sessionJoin"].includes(payload.userID)) { //if (sessionJoin array doesnt already have the user in it)
           sessionData[2].push(payload.name);
           sessionData[4].sessionJoin.push(payload.userID);
@@ -348,7 +350,7 @@ io.on("connection", (socket) => {
   socket.on("studentSendData", (sentData) => {
     var sessionData = findElementInArray(data, sentData.sessionID, 0);
     if (sessionData) {
-      verify(sentData.token).then((payload) => {
+      verify(sentData.token, "student").then((payload) => {
         var currentActionArray = sessionData[4].studentSendData;
         if (!currentActionArray.includes(payload.userID)) {
           sessionData[3].push(sentData.prefs);
@@ -395,7 +397,7 @@ io.on("connection", (socket) => {
   socket.on("sessionLeave", (studentData) => { //for students who disconnect while inside a session
     var sessionData = findElementInArray(data, studentData.sessionID, 0);
     if (sessionData) {
-      verify(studentData.token).then((payload) => {
+      verify(studentData.token, "student").then((payload) => {
         sessionData[2] = arrayRemove(sessionData[2], payload.name);
         var currentActionArray = sessionData[4].sessionLeave;
         if (!currentActionArray.includes(payload.userID)) {
@@ -426,7 +428,7 @@ io.on("connection", (socket) => {
   socket.on("studentReady", (studentData) => { //when a student ready up
     var sessionData = findElementInArray(data, studentData.sessionID, 0);
     if (sessionData) {
-      verify(studentData.token).then((payload) => {
+      verify(studentData.token, "student").then((payload) => {
         var currentActionArray = sessionData[4].studentReady;
         if (!currentActionArray.includes(payload.userID)) {
           currentActionArray.push(payload.userID);

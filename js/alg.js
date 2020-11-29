@@ -1,5 +1,10 @@
 
-function findOptimum(groupSize, studentList, prefs) { //add double pass
+function arrayRemove(array, element) {
+  var arrayCopy = JSON.parse(JSON.stringify(array));
+  return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
+}
+
+function findOptimum(groupSize, studentList, prefs) {
 
   function splitIntoGroups(groupSize, studentList) {
     var numGroups = Math.ceil(studentList.length / groupSize);
@@ -7,7 +12,7 @@ function findOptimum(groupSize, studentList, prefs) { //add double pass
     for (var i = 0; i < numGroups; i++) {
       splitGroups.push([]);
     }
-  
+
     var j = 0;
     for (var i = 0; i < studentList.length; i++) {
       if (splitGroups[j].length >= groupSize) {
@@ -15,29 +20,26 @@ function findOptimum(groupSize, studentList, prefs) { //add double pass
       }
       splitGroups[j].push(studentList[i]);
     }
-  
+
     return splitGroups;
   }
-  function arrayRemove(array, element) {
-    var arrayCopy = JSON.parse(JSON.stringify(array));
-    return arrayCopy.filter(elem => elem != element);
-  }
-  
+
+
   function findWanting(person, prefs) { //find who wants a certain person in their group
     var people = [];
     prefs.forEach((pref) => {
       var student = pref[0];
       var studentPrefs = pref[1];
-  
+
       if (studentPrefs.includes(person)) {
-        people.push(student);    
+        people.push(student);
       }
     });
-  
+
     return people;
-  
+
   }
-  
+
   function findStudentPrefs(student, prefs) {
     var studentPrefs = false;
     prefs.forEach((pref) => {
@@ -45,46 +47,47 @@ function findOptimum(groupSize, studentList, prefs) { //add double pass
         studentPrefs = pref;
       }
     });
-  
+
     return studentPrefs;
   }
-  
-  function swapTwoPeople(sG, studentA, studentB) { 
-  
+
+  function swapTwoPeople(sG, studentA, studentB) {
+
     var splitGroups = JSON.parse(JSON.stringify(sG));
     var Agroup = splitGroups.find(group => group.includes(studentA));
     var Bgroup = splitGroups.find(group => group.includes(studentB));
-  
+
     if (Agroup == Bgroup) {
       return splitGroups;
     }
-  
+
     var Aindex = splitGroups.indexOf(Agroup);
     var Bindex = splitGroups.indexOf(Bgroup);
-  
-    
+
+
     Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
     Bgroup = arrayRemove(Bgroup, studentB);
-  
+
     Bgroup.push(studentA); //shove them in different groups
     Agroup.push(studentB);
-  
+
     splitGroups[Aindex] = Agroup;
     splitGroups[Bindex] = Bgroup;
-  
+
     return splitGroups;
   }
 
   var splitGroups = splitIntoGroups(groupSize, studentList);
-  prefs.forEach((pref) => {
-    var student = pref[0];
-    var studentPrefs = pref[1];
-    var studentGroup = splitGroups.find(group => group.includes(student));
+  for (var i = 0; i < 2; i++) {
+    prefs.forEach((pref) => {
+      var student = pref[0];
+      var studentPrefs = pref[1];
+      var studentGroup = splitGroups.find(group => group.includes(student));
 
-    studentPrefs.forEach((person) => {
-      var personGroup = splitGroups.find(group => group.includes(person));
+      studentPrefs.forEach((person) => {
+        var personGroup = splitGroups.find(group => group.includes(person));
 
-      //the person wants a swap; "student" wants to be in "person"'s group | "student" may swap with "swapPerson" in order to do so
+        //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
         var swapPeople = arrayRemove(personGroup, person);
 
         swapPeople.forEach((swapPerson) => { //for every person to swap with
@@ -97,11 +100,11 @@ function findOptimum(groupSize, studentList, prefs) { //add double pass
           var Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
           personGroup.forEach((Bperson) => {
-            if (wantingB.includes(Bperson)) { //someone in B's group wanted B
+            if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
               gain--;
             }
 
-            if (wantingA.includes(Bperson)) { //somone in B's group wants A
+            if (wantingA.includes(Bperson)) { //somone in B"s group wants A
               gain++;
             }
 
@@ -115,11 +118,11 @@ function findOptimum(groupSize, studentList, prefs) { //add double pass
           });
 
           studentGroup.forEach((Aperson) => {
-            if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+            if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
               gain--;
             }
 
-            if (wantingB.includes(Aperson)) { //somone in A's group wants B
+            if (wantingB.includes(Aperson)) { //somone in A"s group wants B
               gain++;
             }
 
@@ -138,20 +141,20 @@ function findOptimum(groupSize, studentList, prefs) { //add double pass
           }
 
           // studentGroup.forEach((Aperson) => {
-          //   if (wantingA.includes(Aperson)) { //someone in A's group wanted A
+          //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
           //     gain--;
           //   }
           // });
 
         });
-        
+
+      });
     });
-  });
+  }
 
   if (splitGroups[splitGroups.length - 1].length < 2) {
     splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
     splitGroups.pop();
-    console.log("pushed extra");
   }
   return splitGroups;
 }
