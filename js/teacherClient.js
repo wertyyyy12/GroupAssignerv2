@@ -186,6 +186,12 @@ $(document).ready(function () {
         window.location.href = '/';
     });
 
+    document.getElementById("groupSize").addEventListener("change", function(){
+        if (this.value <= 1) {
+            this.value = 2;
+        }
+    });
+
     window.onunload = function () {
         socket.emit("endSession", {
             sessionID: mySessionID,

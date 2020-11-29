@@ -1,6 +1,5 @@
 -teacher should also be able to view group selections
     -teacher view student prefrences in real time Oo-o
--strict max teacher group setting
 -make number field for teacher more "smart"
     -not allowing 1 or any other non-number to exist
 -reset teacher, student GUIs after the session ends
@@ -12,6 +11,7 @@
 
 ASK:
     -teacher add absent students
+    -strict max teacher group setting
 
 ON PRODUCTION:
     -change procfile to "node index.js"
