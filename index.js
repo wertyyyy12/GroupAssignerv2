@@ -1,4 +1,5 @@
 const { rejects } = require("assert");
+const { group } = require("console");
 var express = require("express");
 var app = express();
 // var path = require("path");
@@ -244,7 +245,12 @@ io.on("connection", (socket) => {
         "teacher": payload.userID
       }
       console.log("teacher set as " + payload.userID);
-      data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions]);
+      if (teacherData.groupSize >= 2) {
+        data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions]);
+      }
+      else {
+        console.log("group size must be >= 2");
+      }
     }).catch(() => {
       console.log("invalid teacher attempt");
     });
