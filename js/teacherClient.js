@@ -9,19 +9,19 @@ $(document).ready(function () {
     var groups;
 
     //temporary diversion to avoid tampering (by no means impossible)
-    // localStorage.removeItem("teacherName");
-    // localStorage.removeItem("userToken");
+    localStorage.removeItem("teacherName");
+    localStorage.removeItem("userToken");
 
-    // //just in case
-    // localStorage.removeItem("studentName");
+    //just in case
+    localStorage.removeItem("studentName");
 
-    // if (!myName) {
-    //     window.location.href = "/";
-    // }
+    if (!myName) {
+        window.location.href = "/";
+    }
 
-    // else {
-    //     $("#teacherName").html(`Teacher Name: ${myName}`);
-    // }
+    else {
+        $("#teacherName").html(`Teacher Name: ${myName}`);
+    }
 
     $("#teacherName").html(`Teacher Name: ${myName}`);
     //prevents duplicate notifications from showing up (no trolling lol)

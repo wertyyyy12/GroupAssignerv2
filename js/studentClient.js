@@ -5,19 +5,19 @@ $(document).ready(function(){
     var idToken = localStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    // localStorage.removeItem("userToken");
-    // localStorage.removeItem("studentName");
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("studentName");
 
-    // //jsut in case
-    // localStorage.removeItem("teacherName");
+    //jsut in case
+    localStorage.removeItem("teacherName");
 
-    // if (!myName) {
-    //     window.location.href = "/";
-    // }
+    if (!myName) {
+        window.location.href = "/";
+    }
 
-    // else {
-    //     $("#studentName").html(`Name: ${myName}`);
-    // }
+    else {
+        $("#studentName").html(`Name: ${myName}`);
+    }
 
     $("#studentName").html(`Name: ${myName}`);
     var socket = io();
