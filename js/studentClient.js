@@ -1,6 +1,6 @@
 
 $(document).ready(function(){
-    // $("#hi").html(localStorage.getItem("studentName"));
+    // $("#hi").html(sessionStorage.getItem("studentName"));
     var myName = sessionStorage.getItem("studentName");
     var idToken = sessionStorage.getItem("userToken");
 

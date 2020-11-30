@@ -6,6 +6,8 @@ $(document).ready(function () {
     var myName = sessionStorage.getItem("teacherName");
     var idToken = sessionStorage.getItem("userToken");
 
+    var groups;
+
     //temporary diversion to avoid tampering (by no means impossible)
     sessionStorage.removeItem("teacherName");
     sessionStorage.removeItem("userToken");
@@ -133,7 +135,7 @@ $(document).ready(function () {
     });
 
     socket.on("GetGroups", function (data) {
-        var groups = data.groups;
+        groups = data.groups;
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
@@ -179,7 +181,33 @@ $(document).ready(function () {
             disconnect: false,
             token: idToken
         });
+
+        $("#saveGroups").css("display", "inline");
         toastr.success(`Ended Session ID "${mySessionID}"`);
+    });
+
+    $("#saveGroups").click(function () {
+        groups.forEach((group, groupIndex) => {
+            group.unshift("");
+            group.unshift(`Group ${groupIndex+1}`);
+            console.log(groupIndex);
+            
+        });
+        
+        //transpose groups into columns
+        groups = groups[0].map((x,i) => groups.map(x => x[i]));
+
+        console.log(groups);
+
+        let csvContent = "data:text/csv;charset=utf-8," 
+            + groups.map(e => e.join(",")).join("\n");
+
+        link = document.createElement('a');
+        link.setAttribute('href', csvContent);
+        link.setAttribute('download', `${myName}_groups.csv`);
+        link.click();
+        link.remove();
+
     });
 
     $("#Back").click(function () {
