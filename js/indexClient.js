@@ -20,17 +20,17 @@ var googleUser = {};
     auth2.attachClickHandler(element, {},
         function(googleUser) {
           if (type == "student") {
-            sessionStorage.setItem('studentName', googleUser.getBasicProfile().getName());
+            localStorage.setItem('studentName', googleUser.getBasicProfile().getName());
             window.location.href = "./html/studentClient.html";
           }
 
           if (type == "teacher") {
-            sessionStorage.setItem('teacherName', googleUser.getBasicProfile().getName());
+            localStorage.setItem('teacherName', googleUser.getBasicProfile().getName());
             window.location.href = "./html/teacherClient.html";
           }
 
           var id_token = googleUser.getAuthResponse().id_token;
-          sessionStorage.setItem('userToken', id_token);
+          localStorage.setItem('userToken', id_token);
         // }, function(error) {
         //   alert(JSON.stringify(error, undefined, 2));
         });

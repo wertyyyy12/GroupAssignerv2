@@ -1,24 +1,25 @@
 
 $(document).ready(function(){
     // $("#hi").html(localStorage.getItem("studentName"));
-    var myName = sessionStorage.getItem("studentName");
-    var idToken = sessionStorage.getItem("userToken");
+    var myName = localStorage.getItem("studentName");
+    var idToken = localStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    sessionStorage.removeItem("userToken");
-    sessionStorage.removeItem("studentName");
+    // localStorage.removeItem("userToken");
+    // localStorage.removeItem("studentName");
 
-    //jsut in case
-    sessionStorage.removeItem("teacherName");
+    // //jsut in case
+    // localStorage.removeItem("teacherName");
 
-    if (!myName) {
-        window.location.href = "/";
-    }
+    // if (!myName) {
+    //     window.location.href = "/";
+    // }
 
-    else {
-        $("#studentName").html(`Name: ${myName}`);
-    }
+    // else {
+    //     $("#studentName").html(`Name: ${myName}`);
+    // }
 
+    $("#studentName").html(`Name: ${myName}`);
     var socket = io();
     var mySessionID;
 
@@ -219,7 +220,9 @@ $(document).ready(function(){
 
         ready = true;
 
-    }); 
+    });
+    
+    
 
     window.onunload = function() {
         if (inSession) {
