@@ -1,15 +1,17 @@
--xss filtering
 -teacher should also be able to view group selections
     -teacher view student prefrences in real time Oo-o
+-save student list (?)
+-copy button for sessionID
+-all groups have 2 students but there is only 1 student?
+-teacher modify student selections
+-domain restrictions
 
 ASK:
     -teacher add absent students
     -strict max teacher group setting
-    -teacher rosters
-    -teacher modify student selections
 
 ON PRODUCTION:
     -change procfile to "node index.js"
-    -bring back domain restrictions (if applicable)
+    -bring back domain restrictions
     -switch to sessionStorage
     -bring back null redirects/clearing sessionStorage keys

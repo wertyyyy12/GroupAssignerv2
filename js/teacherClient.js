@@ -3,27 +3,27 @@ $(document).ready(function () {
     var socket = io();
     var studentsReady = 0;
     var readyList = [];
-    var myName = sessionStorage.getItem("teacherName");
-    var idToken = sessionStorage.getItem("userToken");
+    var myName = localStorage.getItem("teacherName");
+    var idToken = localStorage.getItem("userToken");
 
     var groups;
 
     //temporary diversion to avoid tampering (by no means impossible)
-    sessionStorage.removeItem("teacherName");
-    sessionStorage.removeItem("userToken");
+    // localStorage.removeItem("teacherName");
+    // localStorage.removeItem("userToken");
 
-    //just in case
-    sessionStorage.removeItem("studentName");
+    // //just in case
+    // localStorage.removeItem("studentName");
 
-    if (!myName) {
-        window.location.href = "/";
-    }
+    // if (!myName) {
+    //     window.location.href = "/";
+    // }
 
-    else {
-        $("#teacherName").html(`Teacher Name: ${myName}`);
-    }
+    // else {
+    //     $("#teacherName").html(`Teacher Name: ${myName}`);
+    // }
 
-    
+    $("#teacherName").html(`Teacher Name: ${myName}`);
     //prevents duplicate notifications from showing up (no trolling lol)
     toastr.options = {
         "preventDuplicates": true,
@@ -70,12 +70,10 @@ $(document).ready(function () {
                 $("#groupSizeViolation").html(`There will be a group with ${data.leftOver} students with the current student list.`);
             }
 
-            else {
+            else if (data.violation == false) { //must be explicitly false cuz .violation is not always defined
                 $("#groupSizeViolation").html(`All groups have ${$("#groupSize").val()} students.`);
             }
 
-            console.log("update");
-            console.log(data.type);
             if (data.studentList) { //refresh student list (delete all and rebuild with additional data)
                 $("#studentList").empty();
                 data.studentList.forEach((student) => {
@@ -150,6 +148,29 @@ $(document).ready(function () {
         }
     });
 
+    //copy button functionality
+
+    $("#copy-button").tooltip();
+    $('#copy-button').click(function() {
+    var textArea = document.createElement("textarea");
+    textArea.value = mySessionID;
+    document.body.appendChild(textArea);       
+    textArea.select();
+    try {
+        var success = document.execCommand('copy');
+        if (success) {
+            $("#copy-button").attr('data-original-title', "Copied!").tooltip('show');
+            setTimeout(() => {$("#copy-button").removeAttr("data-original-title")}, 1000);
+        } else {
+            $("#copy-button").attr('data-original-title', "Copy with Ctrl-C").tooltip('show');
+        }
+    } catch (err) {
+        $("#copy-button").attr('data-original-title', "Copy with Ctrl-C").tooltip('show');
+    }
+
+    textArea.remove();
+    });
+
     $("#startSession").click(function () {
         if (mySessionID != "") {
             if ($("#groupSize").val() != "") {
@@ -166,11 +187,14 @@ $(document).ready(function () {
                 $("#sIDindicator").html("<b>Session ID: </b>" + mySessionID);
                 $("#gSizeindicator").html("<b>Group Size: </b>" + $("#groupSize").val());
 
-                toastr.success("Session Created");
 
                 $("#endSession").css("display", "inline");
+                $("#copy-button").css("display", "inline");
+                
                 $("#sID").css("display", "none");
 
+
+                toastr.success("Session Created");
             }
         }
     });
@@ -212,6 +236,12 @@ $(document).ready(function () {
 
     $("#Back").click(function () {
         window.location.href = '/';
+    });
+
+    document.getElementById("groupSize").addEventListener("change", function(){
+        if (this.value <= 1) {
+            this.value = 2;
+        }
     });
 
     window.onunload = function () {
