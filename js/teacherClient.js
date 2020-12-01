@@ -6,20 +6,22 @@ $(document).ready(function () {
     var myName = localStorage.getItem("teacherName");
     var idToken = localStorage.getItem("userToken");
 
+    var groups;
+
     //temporary diversion to avoid tampering (by no means impossible)
-    // localStorage.removeItem("teacherName");
-    // localStorage.removeItem("userToken");
+    localStorage.removeItem("teacherName");
+    localStorage.removeItem("userToken");
 
-    // //just in case
-    // localStorage.removeItem("studentName");
+    //just in case
+    localStorage.removeItem("studentName");
 
-    // if (!myName) {
-    //     window.location.href = "/";
-    // }
+    if (!myName) {
+        window.location.href = "/";
+    }
 
-    // else {
-    //     $("#teacherName").html(`Teacher Name: ${myName}`);
-    // }
+    else {
+        $("#teacherName").html(`Teacher Name: ${myName}`);
+    }
 
     $("#teacherName").html(`Teacher Name: ${myName}`);
     //prevents duplicate notifications from showing up (no trolling lol)
@@ -131,7 +133,7 @@ $(document).ready(function () {
     });
 
     socket.on("GetGroups", function (data) {
-        var groups = data.groups;
+        groups = data.groups;
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
@@ -203,7 +205,33 @@ $(document).ready(function () {
             disconnect: false,
             token: idToken
         });
+
+        $("#saveGroups").css("display", "inline");
         toastr.success(`Ended Session ID "${mySessionID}"`);
+    });
+
+    $("#saveGroups").click(function () {
+        groups.forEach((group, groupIndex) => {
+            group.unshift("");
+            group.unshift(`Group ${groupIndex+1}`);
+            console.log(groupIndex);
+            
+        });
+        
+        //transpose groups into columns
+        groups = groups[0].map((x,i) => groups.map(x => x[i]));
+
+        console.log(groups);
+
+        let csvContent = "data:text/csv;charset=utf-8," 
+            + groups.map(e => e.join(",")).join("\n");
+
+        link = document.createElement('a');
+        link.setAttribute('href', csvContent);
+        link.setAttribute('download', `${myName}_groups.csv`);
+        link.click();
+        link.remove();
+
     });
 
     $("#Back").click(function () {
