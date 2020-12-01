@@ -1,17 +1,22 @@
 -teacher should also be able to view group selections
     -teacher view student prefrences in real time Oo-o
--save student list (?)
--copy button for sessionID
--all groups have 2 students but there is only 1 student?
--teacher modify student selections
--domain restrictions
+-see student choices
+-# of groups rather than group size
+-student rosters -> list of absent students
+-Server side input filtering
+    -student choices are reasonable (not nonsense that doesnt exist)
+    -num choices <= allowed choices
+-highlight student group
 
 ASK:
     -teacher add absent students
     -strict max teacher group setting
+    -domain restrictions
 
 ON PRODUCTION:
     -change procfile to "node index.js"
-    -bring back domain restrictions
+    -bring back domain restrictions (if needed)
     -switch to sessionStorage
     -bring back null redirects/clearing sessionStorage keys
+
+-teacher modify student selections
