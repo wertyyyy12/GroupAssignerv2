@@ -21,6 +21,7 @@ async function verify(token, type) {
   const payload = ticket.getPayload();
   const userid = payload['sub'];
   const username = payload['name'];
+  const email = payload['email'];
   // If request specified a G Suite domain:
   
   // if (type == "student") {
@@ -32,13 +33,14 @@ async function verify(token, type) {
 
   return {
     userID: userid, 
-    name: username
+    name: username,
+    email: email
   };
 }
 
 var data = [];
-//            sessionData              [0]  [1]      [2]      [3]       [4]
-//data (each dataCell) is stored like [sID, g#, studentList, prefs, userActions]
+//            sessionData              [0]  [1]      [2]      [3]       [4]           [5]
+//data (each dataCell) is stored like [sID, g#, studentList, prefs, userActions, emailAdresses]
 function arrayRemove(array, element) {
   var arrayCopy = JSON.parse(JSON.stringify(array));
   return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
@@ -247,7 +249,7 @@ io.on("connection", (socket) => {
       }
       console.log("teacher set as " + payload.userID);
       if (teacherData.groupSize >= 2) {
-        data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions]);
+        data.push([teacherData.sessionID, teacherData.groupSize, [], [], templateUserActions, {}]);
       }
       else {
         console.log("group size must be >= 2");
@@ -276,13 +278,13 @@ io.on("connection", (socket) => {
             type: "add"
           });
 
+          sessionData[5][`${payload.name}`] = payload.email;
           socket.broadcast.emit("updateTeacherInfo", { //tells teachers to update student leftover counters
             studentList: sessionData[2],
             sessionID: studentData.sessionID
           });
 
           var leftOverStudents = sessionData[2].length % sessionData[1];
-          console.log(leftOverStudents);
           console.log(sessionData[2].length);
           if (leftOverStudents != 0) {
             if (sessionData[2].length >= sessionData[1]) {
@@ -333,6 +335,8 @@ io.on("connection", (socket) => {
       if (sessionData[4].teacher == payload.userID) {
         console.log(`ending session ${teacherData.sessionID}`);
 
+        socket.emit("getEmails", sessionData[5]);
+
         if (!teacherData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
           io.emit("clientSessionEnd", {
             sessionID: sessionID,
@@ -369,7 +373,8 @@ io.on("connection", (socket) => {
             if (sessionData[3].length > 1) {
               io.emit("GetGroups", {
                 sessionID: sessionData[0],
-                groups: findOptimum(sessionData[1], sessionData[2], sessionData[3])
+                groups: findOptimum(sessionData[1], sessionData[2], sessionData[3]),
+                prefs: sessionData[3]
               });
             }
             data = arrayRemove(data, sessionData);
@@ -415,6 +420,11 @@ io.on("connection", (socket) => {
           sessionData[4].sessionJoin = arrayRemove(sessionData[4].sessionJoin, payload.userID);
           sessionData[4].studentSendData = arrayRemove(sessionData[4].studentSendData, payload.userID);
           sessionData[4].studentReady = arrayRemove(sessionData[4].studentReady, payload.userID);
+
+          //remove their name from the email list
+          delete sessionData[5][`${payload.name}`];
+
+
           io.emit("updateStudentList", {
             sessionData: sessionData,
             name: payload.name,

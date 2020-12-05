@@ -1,15 +1,15 @@
 
 $(document).ready(function(){
-    // $("#hi").html(localStorage.getItem("studentName"));
-    var myName = localStorage.getItem("studentName");
-    var idToken = localStorage.getItem("userToken");
+    // $("#hi").html(sessionStorage.getItem("studentName"));
+    var myName = sessionStorage.getItem("studentName");
+    var idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("studentName");
+    // sessionStorage.removeItem("userToken");
+    // sessionStorage.removeItem("studentName");
 
-    //jsut in case
-    localStorage.removeItem("teacherName");
+    // //jsut in case
+    // sessionStorage.removeItem("teacherName");
 
     if (!myName) {
         window.location.href = "/";
