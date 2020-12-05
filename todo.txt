@@ -12,8 +12,6 @@
     -num choices <= allowed choices
 -highlight student group
 
--zoom and canvas api usage
-
 ASK:
     -teacher add absent students
     -strict max teacher group setting

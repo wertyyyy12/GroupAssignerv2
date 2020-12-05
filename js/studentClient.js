@@ -179,12 +179,20 @@ $(document).ready(function(){
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
-                <h3>Group ${index + 1} </h3>
+                <div id="GroupList${index + 1}div" style="display: inline-block; padding: 7px;">
+                <h3 id="GroupList${index + 1}heading">Group ${index + 1} </h3>
                 <ul id="GroupList${index + 1}"></ul>
+                </div>
                 `);
 
                 group.forEach((person) => {
                     $(`#GroupList${index + 1}`).append(`<li>${person}</li>`);
+                    if (person == myName) {
+                        $(`#GroupList${index + 1}`).css("color", "green");
+                        $(`#GroupList${index + 1}`).parent().css("border", "1px solid green");
+
+                        $(`#GroupList${index + 1}heading`).css("color", "green");
+                    }
                 });
             });
         }
