@@ -1,6 +1,10 @@
--teacher should also be able to view group selections
-    -teacher view student prefrences in real time Oo-o
 -see student choices
+    -number of prefrences submitted, accomadated, rejected, accomadation percent
+
+-algorithm improvements
+    -randomization of initial group
+    -considering ALL swaps
+
 -# of groups rather than group size
 -student rosters -> list of absent students
 -Server side input filtering

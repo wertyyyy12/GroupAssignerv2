@@ -3,17 +3,18 @@ $(document).ready(function () {
     var socket = io();
     var studentsReady = 0;
     var readyList = [];
-    var myName = localStorage.getItem("teacherName");
-    var idToken = localStorage.getItem("userToken");
+    var myName = sessionStorage.getItem("teacherName");
+    var idToken = sessionStorage.getItem("userToken");
 
     var groups;
-
+    var emailAdresses;
+    // console.log(process);
     //temporary diversion to avoid tampering (by no means impossible)
-    localStorage.removeItem("teacherName");
-    localStorage.removeItem("userToken");
+    // sessionStorage.removeItem("teacherName");
+    // sessionStorage.removeItem("userToken");
 
-    //just in case
-    localStorage.removeItem("studentName");
+    // //just in case
+    // sessionStorage.removeItem("studentName");
 
     if (!myName) {
         window.location.href = "/";
@@ -77,7 +78,7 @@ $(document).ready(function () {
             if (data.studentList) { //refresh student list (delete all and rebuild with additional data)
                 $("#studentList").empty();
                 data.studentList.forEach((student) => {
-                    $("#studentList").append(`<li>${student}</li>`);
+                    $("#studentList").append(`<li id="${student}">${student}</li>`);
                 });
 
                 if (data.studentList.length != 1) {
@@ -135,6 +136,7 @@ $(document).ready(function () {
     socket.on("GetGroups", function (data) {
         groups = data.groups;
         if (data.sessionID == mySessionID) {
+            //actual group html creation 
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
                 <h3>Group ${index + 1} </h3>
@@ -145,11 +147,42 @@ $(document).ready(function () {
                     $(`#GroupList${index + 1}`).append(`<li>${person}</li>`);
                 });
             });
+
+            //prefrences adding
+            data.prefs.forEach((studentPref) => {
+                let student = studentPref[0];
+
+                //build a string with the student prefrences
+                let studentPrefString = studentPref[1].join().replace(",", ", ");
+                let tdClass = "";
+
+                //change background to green if that student was ready
+                if (readyList.includes(student)) {
+                    tdClass = "table-success";
+                }
+
+                $("studentPrefsList").css("display", "inline");
+                //add the table data to the table
+                $("#studentPrefsList").append(`
+                    <tr>
+                        <td class=${tdClass}>${student}</td>
+                        <td class=${tdClass}>${studentPrefString}</td>
+                    </tr>
+                `);
+
+                $("#studentList").css("display", "none");
+                $("#studentListHeading").css("display", "none");
+                document.getElementById("studentPrefsList").style = "display: inline;";
+            });
         }
     });
 
-    //copy button functionality
 
+    socket.on("getEmails", function (emails) {
+        emailAdresses = emails;
+    });
+
+    //copy button functionality
     $("#copy-button").tooltip();
     $('#copy-button').click(function() {
     var textArea = document.createElement("textarea");
@@ -211,20 +244,23 @@ $(document).ready(function () {
     });
 
     $("#saveGroups").click(function () {
+        //format the csv so that it can be used to assign breakout rooms in Zoom
+        //Add the recomended header to the csv data
+        let csvData = [["Pre-assign Room Name", "Email Address"]];
         groups.forEach((group, groupIndex) => {
-            group.unshift("");
-            group.unshift(`Group ${groupIndex+1}`);
-            console.log(groupIndex);
-            
-        });
-        
-        //transpose groups into columns
-        groups = groups[0].map((x,i) => groups.map(x => x[i]));
+            group.unshift(`Group ${groupIndex+1}`); //add group name to each group
 
-        console.log(groups);
+            for (let i = 1; i < group.length; i++) {
+                //skip the very first element cuz it is the group name
+                csvData.push([group[0], emailAdresses[group[i]]]);
+            }
+        });
+    
+
+        console.log(csvData);
 
         let csvContent = "data:text/csv;charset=utf-8," 
-            + groups.map(e => e.join(",")).join("\n");
+            + csvData.map(e => e.join(",")).join("\n");
 
         link = document.createElement('a');
         link.setAttribute('href', csvContent);

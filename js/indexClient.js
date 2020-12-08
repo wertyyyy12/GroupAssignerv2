@@ -1,5 +1,4 @@
 var socket = io();
-
 var googleUser = {};
   var startApp = function() {
     gapi.load('auth2', function(){
@@ -20,17 +19,17 @@ var googleUser = {};
     auth2.attachClickHandler(element, {},
         function(googleUser) {
           if (type == "student") {
-            localStorage.setItem('studentName', googleUser.getBasicProfile().getName());
+            sessionStorage.setItem('studentName', googleUser.getBasicProfile().getName());
             window.location.href = "./html/studentClient.html";
           }
 
           if (type == "teacher") {
-            localStorage.setItem('teacherName', googleUser.getBasicProfile().getName());
+            sessionStorage.setItem('teacherName', googleUser.getBasicProfile().getName());
             window.location.href = "./html/teacherClient.html";
           }
 
           var id_token = googleUser.getAuthResponse().id_token;
-          localStorage.setItem('userToken', id_token);
+          sessionStorage.setItem('userToken', id_token);
         // }, function(error) {
         //   alert(JSON.stringify(error, undefined, 2));
         });

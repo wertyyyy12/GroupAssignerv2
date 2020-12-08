@@ -1,15 +1,15 @@
 
 $(document).ready(function(){
-    // $("#hi").html(localStorage.getItem("studentName"));
-    var myName = localStorage.getItem("studentName");
-    var idToken = localStorage.getItem("userToken");
+    // $("#hi").html(sessionStorage.getItem("studentName"));
+    var myName = sessionStorage.getItem("studentName");
+    var idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("studentName");
+    // sessionStorage.removeItem("userToken");
+    // sessionStorage.removeItem("studentName");
 
-    //jsut in case
-    localStorage.removeItem("teacherName");
+    // //jsut in case
+    // sessionStorage.removeItem("teacherName");
 
     if (!myName) {
         window.location.href = "/";
@@ -179,12 +179,20 @@ $(document).ready(function(){
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
-                <h3>Group ${index + 1} </h3>
+                <div id="GroupList${index + 1}div" style="display: inline-block; padding: 7px;">
+                <h3 id="GroupList${index + 1}heading">Group ${index + 1} </h3>
                 <ul id="GroupList${index + 1}"></ul>
+                </div>
                 `);
 
                 group.forEach((person) => {
                     $(`#GroupList${index + 1}`).append(`<li>${person}</li>`);
+                    if (person == myName) {
+                        $(`#GroupList${index + 1}`).css("color", "green");
+                        $(`#GroupList${index + 1}`).parent().css("border", "1px solid green");
+
+                        $(`#GroupList${index + 1}heading`).css("color", "green");
+                    }
                 });
             });
         }
