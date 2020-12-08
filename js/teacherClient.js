@@ -8,6 +8,7 @@ $(document).ready(function () {
 
     var groups;
     var emailAdresses;
+    var numStudents;
     // console.log(process);
     //temporary diversion to avoid tampering (by no means impossible)
     // sessionStorage.removeItem("teacherName");
@@ -83,6 +84,7 @@ $(document).ready(function () {
 
                 if (data.studentList.length != 1) {
                     $("#numStudents").html(`<b>${data.studentList.length}</b> students joined.`);
+                    numStudents = data.studentList.length;
                 }
                 else if (data.studentList.length == 1) {
                     $("#numStudents").html("<b>1</b> student joined.");
@@ -178,8 +180,10 @@ $(document).ready(function () {
     });
 
 
-    socket.on("getEmails", function (emails) {
-        emailAdresses = emails;
+    socket.on("getEmails", function (data) {
+        if (data.sessionID == mySessionID) {
+            emailAdresses = data.emails;
+        }
     });
 
     //copy button functionality
@@ -206,10 +210,11 @@ $(document).ready(function () {
 
     $("#startSession").click(function () {
         if (mySessionID != "") {
-            if ($("#groupSize").val() != "") {
+            if ( ($("#groupSize").val() != "") ||  ($("#numberOfGroups").val() != "") ) { //if either field is filled
+
                 socket.emit("sessionCreate", {
                     sessionID: mySessionID,
-                    groupSize: $("#groupSize").val(),
+                    groupSize: $("#groupSize").val(), //if the group val is "" then so be it    
                     token: idToken
                 });
 
@@ -229,6 +234,8 @@ $(document).ready(function () {
 
                 toastr.success("Session Created");
             }
+
+            
         }
     });
 
@@ -237,7 +244,7 @@ $(document).ready(function () {
             sessionID: mySessionID,
             disconnect: false,
             token: idToken
-        });
+        });   
 
         $("#saveGroups").css("display", "inline");
         toastr.success(`Ended Session ID "${mySessionID}"`);

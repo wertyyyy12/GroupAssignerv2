@@ -10,7 +10,6 @@
 -Server side input filtering
     -student choices are reasonable (not nonsense that doesnt exist)
     -num choices <= allowed choices
--highlight student group
 
 ASK:
     -teacher add absent students
