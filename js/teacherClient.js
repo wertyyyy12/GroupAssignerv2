@@ -11,11 +11,11 @@ $(document).ready(function () {
     var numStudents;
     // console.log(process);
     //temporary diversion to avoid tampering (by no means impossible)
-    // sessionStorage.removeItem("teacherName");
-    // sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("teacherName");
+    sessionStorage.removeItem("userToken");
 
-    // //just in case
-    // sessionStorage.removeItem("studentName");
+    //just in case
+    sessionStorage.removeItem("studentName");
 
     if (!myName) {
         window.location.href = "/";
@@ -24,8 +24,7 @@ $(document).ready(function () {
     else {
         $("#teacherName").html(`Teacher Name: ${myName}`);
     }
-
-    $("#teacherName").html(`Teacher Name: ${myName}`);
+    
     //prevents duplicate notifications from showing up (no trolling lol)
     toastr.options = {
         "preventDuplicates": true,

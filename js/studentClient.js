@@ -5,11 +5,11 @@ $(document).ready(function(){
     var idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    // sessionStorage.removeItem("userToken");
-    // sessionStorage.removeItem("studentName");
+    sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("studentName");
 
-    // //jsut in case
-    // sessionStorage.removeItem("teacherName");
+    //jsut in case
+    sessionStorage.removeItem("teacherName");
 
     if (!myName) {
         window.location.href = "/";
@@ -19,7 +19,6 @@ $(document).ready(function(){
         $("#studentName").html(`Name: ${myName}`);
     }
 
-    $("#studentName").html(`Name: ${myName}`);
     var socket = io();
     var mySessionID;
 
