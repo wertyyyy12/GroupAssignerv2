@@ -92,11 +92,11 @@ $(document).ready(function(){
     });
 
     socket.on("updateStudentList", function(data) { //data: sessionData, name, type
-        if (mySessionID == data.sessionData[0]) {
+        if (mySessionID == data.sessionData.sessionID) {
             if (data.type == "add") {
                 console.log("adding student list: ")
-                console.log(data.sessionData[2]);
-                data.sessionData[2].forEach(studentName => {
+                console.log(data.sessionData.studentList);
+                data.sessionData.studentList.forEach(studentName => {
                     if (myName != studentName) {
                         if (!addedStudents.includes(studentName)){
                             $("#studentList").append(`

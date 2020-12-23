@@ -186,6 +186,10 @@ $(document).ready(function () {
         }
     });
 
+    $("#numberOfGroups").tooltip();
+    $("#groupSize").tooltip();
+    $("#maxSelections").tooltip();
+
     //copy button functionality
     $("#copy-button").tooltip();
     $('#copy-button').click(function() {
@@ -211,12 +215,28 @@ $(document).ready(function () {
     $("#startSession").click(function () {
         if (mySessionID != "") {
             if ( ($("#groupSize").val() != "") ||  ($("#numberOfGroups").val() != "") ) { //if either field is filled
+                if ($("#groupSize").val() >= 2) {
+                    socket.emit("sessionCreate", {
+                        sessionID: mySessionID,
+                        groupSize: $("#groupSize").val(),
+                        token: idToken
+                    });
+                }
 
-                socket.emit("sessionCreate", {
-                    sessionID: mySessionID,
-                    groupSize: $("#groupSize").val(), //if the group val is "" then so be it    
-                    token: idToken
-                });
+                if ($("#numberOfGroups").val() >= 2) {
+                    socket.emit("sessionCreate", {
+                        sessionID: mySessionID,
+                        numGroups: $("#groupSize").val(), 
+                        token: idToken
+                    });
+                }
+
+
+                // socket.emit("sessionCreate", {
+                //     sessionID: mySessionID,
+                //     groupSize: groupInfo, //if the group val is "" then so be it    
+                //     token: idToken
+                // });
 
                 $("#sID").prop("disabled", true);
                 $("#groupSize").prop("disabled", true);
@@ -246,6 +266,7 @@ $(document).ready(function () {
             token: idToken
         });   
 
+        console.log(idToken);
         $("#saveGroups").css("display", "inline");
         toastr.success(`Ended Session ID "${mySessionID}"`);
     });
