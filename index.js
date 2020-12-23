@@ -313,7 +313,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sessionJoin", (studentData) => {
-    console.log(data);
     var sessionData = findSessionByID(data, studentData.sessionID); //find sessionID in data at [0] of element)
     if (sessionData) {
       verify(studentData.token, "student").then((payload) => {
@@ -369,7 +368,7 @@ io.on("connection", (socket) => {
         }
 
         else {
-          socket.emit("sessionReject", "duplicateLogin")
+          socket.emit("sessionReject", "duplicateLogin");
         }
       }).catch(() => {
         socket.emit("sessionReject", "invalidUserAction");
@@ -423,12 +422,10 @@ io.on("connection", (socket) => {
         var currentActionArray = sessionData.userActions.studentSendData;
         if (!currentActionArray.includes(payload.userID)) {
           let invalidPrefs = !checkDuplicates(sentData.prefs[1]); //will initialize "invalidPrefs" to false if there are no duplicates in array
-          console.log(invalidPrefs)
           if (!invalidPrefs) {
             sentData.prefs[1].forEach((pref) => {
               if (!sessionData.studentList.includes(pref)) { //checking if student selections actually exist
                 console.log("DNE!");
-                console.log(sessionData.studentList);
                 invalidPrefs = true;
               }
             });
@@ -442,7 +439,6 @@ io.on("connection", (socket) => {
           }
           
           else {
-            console.log(sentData.prefs[1]);
             socket.emit("sessionReject", "invalidPrefs"); //this goes straight to the student
           }
 
@@ -488,15 +484,16 @@ io.on("connection", (socket) => {
   socket.on("sessionLeave", (studentData) => { //for students who disconnect while inside a session
     var sessionData = findSessionByID(data, studentData.sessionID);
     if (sessionData) {
+      console.log(studentData.token);
       verify(studentData.token, "student").then((payload) => {
         sessionData.studentList = arrayRemove(sessionData.studentList, payload.name);
         var currentActionArray = sessionData.userActions.sessionLeave;
         if (!currentActionArray.includes(payload.userID)) {
           currentActionArray.push(payload.userID);
           //remove the student id from all student actions; they left so they should be able to do them again
-          sessionData.userActions.sessionJoin = arrayRemove(sessionData[4].sessionJoin, payload.userID);
-          sessionData.userActions.studentSendData = arrayRemove(sessionData[4].studentSendData, payload.userID);
-          sessionData.userActions.studentReady = arrayRemove(sessionData[4].studentReady, payload.userID);
+          sessionData.userActions.sessionJoin = arrayRemove(sessionData.userActions.sessionJoin, payload.userID);
+          sessionData.userActions.studentSendData = arrayRemove(sessionData.userActions.studentSendData, payload.userID);
+          sessionData.userActions.studentReady = arrayRemove(sessionData.userActions.studentReady, payload.userID);
 
           //remove their name from the email list
           delete sessionData.emailAddresses[`${payload.name}`];
@@ -515,8 +512,14 @@ io.on("connection", (socket) => {
             type: "studentLeave"
           });
         }
-      }).catch(() => {
+
+        else {
+          console.log("didnt happen");
+        }
+      }).catch((err) => {
         socket.emit("sessionReject", "invalidUserAction");
+        console.log("invalid user action, after 'didnt happen'");
+        console.log(err);
       });
     }
   });
@@ -537,7 +540,6 @@ io.on("connection", (socket) => {
 
         else {
           console.log("diplicate reayd");
-          console.log(currentActionArray);
         }
       }).catch(() => {
         socket.emit("sessionReject", "invalidUserAction");
