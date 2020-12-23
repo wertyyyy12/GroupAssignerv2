@@ -44,17 +44,30 @@ $(document).ready(function(){
     }
 
     socket.on("sessionReject", function(reason) {
-        if (reason == "invalidSessionID") {
-            toastr.error("Invalid Session ID");
-        }
+        switch (reason) {
+            case "invalidSessionID":
+                toastr.error("Invalid Session ID");
+            
+            case "duplicateLogin":
+                toastr.warning("Duplicate login blocked");
 
-        else if (reason == "duplicateLogin") {
-            toastr.warning("Duplicate login blocked");
-        }
+            case "invalidUserAction":
+                toastr.warning("Invalid User Action");
 
-        else if (reason == "invalidUserAction") {
-            toastr.warning("Invalid User Action");
+            case "invalidPrefs":
+                toastr.warning("Prefrences rejected");
         }
+        // if (reason == "invalidSessionID") {
+        //     toastr.error("Invalid Session ID");
+        // }
+
+        // else if (reason == "duplicateLogin") {
+        //     toastr.warning("Duplicate login blocked");
+        // }
+
+        // else if (reason == "invalidUserAction") {
+        //     toastr.warning("Invalid User Action");
+        // }
 
     });
 

@@ -12,9 +12,9 @@
     -num choices <= allowed choices
 
 ASK:
-    -teacher add absent students
+    -teacher add absent students 
     -strict max teacher group setting
-    -domain restrictions
+    -domain restrictions        
 
 ON PRODUCTION:
     -change procfile to "node index.js"

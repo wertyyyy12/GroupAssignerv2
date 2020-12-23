@@ -41,9 +41,28 @@ async function verify(token, type) {
 var data = [];
 //            sessionData              [0]  [1]      [2]      [3]       [4]           [5]
 //data (each dataCell) is stored like [sID, g#, studentList, prefs, userActions, emailAdresses]
+
+//utility functions (usually for array manupulation)
 function arrayRemove(array, element) {
   var arrayCopy = JSON.parse(JSON.stringify(array));
   return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
+}
+
+//finds if there is a duplicate
+function checkDuplicates(array) {
+  //stores all the values
+  let bank = {};
+
+  for(var i = 0; i <= array.length; i++) {
+      // If the key is empty it fills it
+      // If the key isnt empty then we found a duplicate
+      if (!bank[array[i]] === undefined) {
+          bank[array[i]] = 1;
+      } else {
+          return true;
+      }
+  }
+  return false;
 }
 
 function findOptimum(groupSize, studentList, prefs) {
@@ -267,7 +286,7 @@ io.on("connection", (socket) => {
           sessionData[2].push(payload.name);
           sessionData[4].sessionJoin.push(payload.userID);
           sessionData[4].sessionLeave = arrayRemove(sessionData[4].sessionLeave, payload.userID);
-          console.log("student user ID " + payload.userID + "joined");
+          console.log("student user ID " + payload.userID + " joined");
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
             maxSelections: Math.ceil(sessionData[1] / 2)
@@ -285,7 +304,6 @@ io.on("connection", (socket) => {
           });
 
           var leftOverStudents = sessionData[2].length % sessionData[1];
-          console.log(sessionData[2].length);
           if (leftOverStudents != 0) {
             if (sessionData[2].length >= sessionData[1]) {
               var violationGroupSize;
@@ -369,8 +387,29 @@ io.on("connection", (socket) => {
       verify(sentData.token, "student").then((payload) => {
         var currentActionArray = sessionData[4].studentSendData;
         if (!currentActionArray.includes(payload.userID)) {
-          sessionData[3].push(sentData.prefs);
-          sessionData[4].studentSendData.push(payload.userID);
+          let invalidPrefs = !checkDuplicates(sentData.prefs[1]); //will initialize "invalidPrefs" to false if there are no duplicates in array
+          console.log(invalidPrefs)
+          if (!invalidPrefs) {
+            sentData.prefs[1].forEach((pref) => {
+              if (!sessionData[2].includes(pref)) { //checking if student selections actually exist
+                console.log("DNE!");
+                console.log(sessionData[2]);
+                invalidPrefs = true;
+              }
+            });
+            
+
+          }
+
+          if (!invalidPrefs) { //checking again looks weird at first glance but there is a purpose
+            sessionData[3].push(sentData.prefs);
+            sessionData[4].studentSendData.push(payload.userID);
+          }
+          
+          else {
+            console.log(sentData.prefs[1]);
+            socket.emit("sessionReject", "invalidPrefs"); //this goes straight to the student
+          }
 
           if (sessionData[3].length == sessionData[2].length) { //all student data has arrived
             if (sessionData[3].length > 1) {
