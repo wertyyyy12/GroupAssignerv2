@@ -3,7 +3,7 @@
 
 -algorithm improvements
     -randomization of initial group
-    -considering ALL swaps
+    -considering ALL swaps (?)
 
 -# of groups rather than group size
 -student rosters -> list of absent students

@@ -2,7 +2,7 @@ const { rejects } = require("assert");
 const { group } = require("console");
 var express = require("express");
 var app = express();
-// var path = require("path");
+// let path = require("path");
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
 var port = process.env.PORT || 3001;
@@ -38,7 +38,7 @@ async function verify(token, type) {
   };
 }
 
-var data = [];
+let data = [];
 
 /*
 data (each dataCell) is stored like
@@ -46,7 +46,8 @@ data (each dataCell) is stored like
   {
     sessionID: *alpha numeric code*,
     groupSize: [may not always exist] *number*,
-    studentList: *array*
+    numGroups: [may not always exist] *number*,
+    studentList: *array*,
     prefs: *array*,
     userActions: *dictionary*,
     emailAddresses: *dictionary*
@@ -56,7 +57,7 @@ data (each dataCell) is stored like
 
 //utility functions (usually for array manupulation)
 function arrayRemove(array, element) {
-  var arrayCopy = JSON.parse(JSON.stringify(array));
+  let arrayCopy = JSON.parse(JSON.stringify(array));
   return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
 }
 
@@ -65,7 +66,7 @@ function checkDuplicates(array) {
   //stores all the values
   let bank = {};
 
-  for(var i = 0; i <= array.length; i++) {
+  for(let i = 0; i <= array.length; i++) {
       // If the key is empty it fills it
       // If the key isnt empty then we found a duplicate
       if (!bank[array[i]] === undefined) {
@@ -77,17 +78,36 @@ function checkDuplicates(array) {
   return false;
 }
 
-function findOptimum(groupSize, studentList, prefs) {
+/*
+constraintType can be either:
+  "groupSize": the number of people in each group
+  "numGroups": the total number of groups to be formed
+*/
+function findOptimum(constraintType, constraint, studentList, prefs) {
 
-  function splitIntoGroups(groupSize, studentList) {
-    var numGroups = Math.ceil(studentList.length / groupSize);
-    var splitGroups = [];
-    for (var i = 0; i < numGroups; i++) {
+  function splitIntoGroups(constraintType, constraint, studentList) {
+    let groupSize;
+    let numGroups;
+    if (constraintType == "groupSize") {
+       groupSize = constraint;
+       numGroups = Math.ceil(studentList.length / groupSize);
+    }
+
+    if (constraintType == "numGroups") {
+       groupSize = Math.ceil(studentList.length / constraint);
+       numGroups = constraint;
+    }
+
+
+
+    let splitGroups = [];
+
+    for (let i = 0; i < numGroups; i++) {
       splitGroups.push([]);
     }
 
-    var j = 0;
-    for (var i = 0; i < studentList.length; i++) {
+    let j = 0;
+    for (let i = 0; i < studentList.length; i++) {
       if (splitGroups[j].length >= groupSize) {
         j++;
       }
@@ -99,10 +119,10 @@ function findOptimum(groupSize, studentList, prefs) {
 
 
   function findWanting(person, prefs) { //find who wants a certain person in their group
-    var people = [];
+    let people = [];
     prefs.forEach((pref) => {
-      var student = pref[0];
-      var studentPrefs = pref[1];
+      let student = pref[0];
+      let studentPrefs = pref[1];
 
       if (studentPrefs.includes(person)) {
         people.push(student);
@@ -114,7 +134,7 @@ function findOptimum(groupSize, studentList, prefs) {
   }
 
   function findStudentPrefs(student, prefs) {
-    var studentPrefs = false;
+    let studentPrefs = false;
     prefs.forEach((pref) => {
       if (pref[0] == student) {
         studentPrefs = pref;
@@ -126,16 +146,16 @@ function findOptimum(groupSize, studentList, prefs) {
 
   function swapTwoPeople(sG, studentA, studentB) {
 
-    var splitGroups = JSON.parse(JSON.stringify(sG));
-    var Agroup = splitGroups.find(group => group.includes(studentA));
-    var Bgroup = splitGroups.find(group => group.includes(studentB));
+    let splitGroups = JSON.parse(JSON.stringify(sG));
+    let Agroup = splitGroups.find(group => group.includes(studentA));
+    let Bgroup = splitGroups.find(group => group.includes(studentB));
 
     if (Agroup == Bgroup) {
       return splitGroups;
     }
 
-    var Aindex = splitGroups.indexOf(Agroup);
-    var Bindex = splitGroups.indexOf(Bgroup);
+    let Aindex = splitGroups.indexOf(Agroup);
+    let Bindex = splitGroups.indexOf(Bgroup);
 
 
     Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
@@ -150,27 +170,27 @@ function findOptimum(groupSize, studentList, prefs) {
     return splitGroups;
   }
 
-  var splitGroups = splitIntoGroups(groupSize, studentList);
-  for (var i = 0; i < 2; i++) {
+  let splitGroups = splitIntoGroups(constraintType, constraint, studentList);
+  for (let i = 0; i < 2; i++) {
     prefs.forEach((pref) => {
-      var student = pref[0];
-      var studentPrefs = pref[1];
-      var studentGroup = splitGroups.find(group => group.includes(student));
+      let student = pref[0];
+      let studentPrefs = pref[1];
+      let studentGroup = splitGroups.find(group => group.includes(student));
 
       studentPrefs.forEach((person) => {
-        var personGroup = splitGroups.find(group => group.includes(person));
+        let personGroup = splitGroups.find(group => group.includes(person));
 
         //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
-        var swapPeople = arrayRemove(personGroup, person);
+        let swapPeople = arrayRemove(personGroup, person);
 
         swapPeople.forEach((swapPerson) => { //for every person to swap with
-          var gain = 0;
+          let gain = 0;
           //student -> A, swapPerson -> B 
           //A group = studentGroup, B group = personGroup (same as swap group)
           //Aprefs = studentPrefs, Bprefs = Bprefs
-          var wantingA = findWanting(student, prefs);
-          var wantingB = findWanting(swapPerson, prefs);
-          var Bprefs = findStudentPrefs(swapPerson, prefs)[1];
+          let wantingA = findWanting(student, prefs);
+          let wantingB = findWanting(swapPerson, prefs);
+          let Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
           personGroup.forEach((Bperson) => {
             if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
@@ -199,7 +219,7 @@ function findOptimum(groupSize, studentList, prefs) {
               gain++;
             }
 
-            if (studentPrefs.includes(Aperson)) { //A wanted someoen in their group
+            if (studentPrefs.includes(Aperson)) { //A wanted someone in their group
               gain--;
             }
 
@@ -225,12 +245,17 @@ function findOptimum(groupSize, studentList, prefs) {
     });
   }
 
-  if (splitGroups[splitGroups.length - 1].length < 2) {
-    splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
-    splitGroups.pop();
+  if (splitGroups[splitGroups.length - 1].length < 2) { //shove a lone student into a group
+    if (splitGroups[splitGroups.length - 1][0]) { //this will happen if numGroups > studentList.length (aka troll input)
+      splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
+      splitGroups.pop();
+    }
   }
+
+  splitGroups = splitGroups.filter(group => group.length > 0); //filter out any empty groups
   return splitGroups;
 }
+
 
 server.listen(port, () => {
   console.log("Server listening at port %d", port);
@@ -244,7 +269,7 @@ app.use(express.static(__dirname + "/js"));
 app.use("/js", express.static(__dirname + "/js"));
 
 function findElementInArray(array, desiredElement, subIndex) {
-  var found = false;
+  let found = false;
   array.forEach(function (element) {
     if (subIndex === undefined) {
       if (element == desiredElement) {
@@ -273,7 +298,7 @@ io.on("connection", (socket) => {
 
   socket.on("sessionCreate", (teacherData) => {
     verify(teacherData.token).then((payload) => {
-      var templateUserActions = {
+      let templateUserActions = {
         //tracks who has done what action (w/ subject IDs from tokens)
         "sessionJoin": [],
         "studentSendData": [],
@@ -298,32 +323,42 @@ io.on("connection", (socket) => {
         data.push(newSessionData);
       }
       else if (teacherData.numGroups >= 2) {
-        newSessionData.numGroups = teacherData.groupSize;
+        newSessionData.numGroups = teacherData.numGroups;
         data.push(newSessionData);
       }
 
       else {
         console.log("teacher didnt enter group size OR a num Groups??");
       }
-      
-      data.push(newSessionData);
     }).catch(() => {
       console.log("invalid teacher attempt");
     });
   });
 
   socket.on("sessionJoin", (studentData) => {
-    var sessionData = findSessionByID(data, studentData.sessionID); //find sessionID in data at [0] of element)
+    let sessionData = findSessionByID(data, studentData.sessionID); //find sessionID in data at [0] of element)
     if (sessionData) {
       verify(studentData.token, "student").then((payload) => {
         if (!sessionData.userActions["sessionJoin"].includes(payload.userID)) { //if (sessionJoin array doesnt already have the user in it)
           sessionData.studentList.push(payload.name);
           sessionData.userActions.sessionJoin.push(payload.userID);
           sessionData.userActions.sessionLeave = arrayRemove(sessionData.userActions.sessionLeave, payload.userID);
+          let groupSize, numGroups;
+
+          if (sessionData.groupSize) {
+            groupSize = sessionData.groupSize;
+            numGroups = Math.ceil(sessionData.studentList.length / groupSize);
+          }
+
+          if (sessionData.numGroups) {
+            numGroups = sessionData.numGroups;
+            groupSize = Math.ceil(sessionData.studentList.length / numGroups);
+          }
+
           console.log("student user ID " + payload.userID + " joined");
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
-            maxSelections: Math.ceil(sessionData.groupSize / 2)
+            maxSelections: Math.ceil(Math.max(groupSize, numGroups) / 2)
           });
           io.emit("updateStudentList", {
             sessionData: sessionData,
@@ -337,10 +372,10 @@ io.on("connection", (socket) => {
             sessionID: studentData.sessionID
           });
 
-          var leftOverStudents = sessionData.studentList.length % sessionData.groupSize;
+          let leftOverStudents = sessionData.studentList.length % sessionData.groupSize;
           if (leftOverStudents != 0) {
             if (sessionData.studentList.length >= sessionData.groupSize) {
-              var violationGroupSize;
+              let violationGroupSize;
               if (leftOverStudents == 1) {
                 violationGroupSize = parseInt(sessionData.groupSize) + 1;
               }
@@ -369,20 +404,23 @@ io.on("connection", (socket) => {
 
         else {
           socket.emit("sessionReject", "duplicateLogin");
+          console.log("session rejected for duplicate login!");
         }
-      }).catch(() => {
+      }).catch((err) => {
         socket.emit("sessionReject", "invalidUserAction");
+        console.log("session rejected: invalid action (after dlogin)");
       });
     }
 
     else {
       socket.emit("sessionReject", "invalidSessionID");
+      console.log("invalid session ID attempt");
     }
   });
 
   socket.on("endSession", (teacherData) => {
-    var sessionID = teacherData.sessionID;
-    var sessionData = findSessionByID(data, sessionID);
+    let sessionID = teacherData.sessionID;
+    let sessionData = findSessionByID(data, sessionID);
     verify(teacherData.token).then((payload) => {
       if (sessionData.userActions.teacher == payload.userID) {
         console.log(`ending session ${teacherData.sessionID}`);
@@ -416,10 +454,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("studentSendData", (sentData) => {
-    var sessionData = findSessionByID(data, sentData.sessionID);
+    let sessionData = findSessionByID(data, sentData.sessionID);
     if (sessionData) {
       verify(sentData.token, "student").then((payload) => {
-        var currentActionArray = sessionData.userActions.studentSendData;
+        let currentActionArray = sessionData.userActions.studentSendData;
         if (!currentActionArray.includes(payload.userID)) {
           let invalidPrefs = !checkDuplicates(sentData.prefs[1]); //will initialize "invalidPrefs" to false if there are no duplicates in array
           if (!invalidPrefs) {
@@ -440,13 +478,24 @@ io.on("connection", (socket) => {
           
           else {
             socket.emit("sessionReject", "invalidPrefs"); //this goes straight to the student
+            console.log("prefrenced were rejected");
           }
 
           if (sessionData.prefs.length == sessionData.studentList.length) { //all student data has arrived
+            let constraint, constraintValue;
+            if (sessionData.groupSize) {
+              constraint = "groupSize"; 
+              constraintValue = sessionData.groupSize;
+            }
+
+            if (sessionData.numGroups) {
+              constraint = "numGroups";
+              constraintValue = sessionData.numGroups;
+            }
             if (sessionData.prefs.length > 1) {
               io.emit("GetGroups", {
                 sessionID: sessionData.sessionID,
-                groups: findOptimum(sessionData.groupSize, sessionData.studentList, sessionData.prefs),
+                groups: findOptimum(constraint, constraintValue, sessionData.studentList, sessionData.prefs),
                 prefs: sessionData.prefs
               });
             }
@@ -458,14 +507,16 @@ io.on("connection", (socket) => {
           }
         }
       })
-        .catch(() => {
-          socket.emit("sessionReject", "invalidUserAction");
-        });
+      .catch((err) => {
+        socket.emit("sessionReject", "invalidUserAction");
+        console.log("invalid user action, after (not ready)");
+        console.log(err);
+      });
     }
   });
 
   socket.on("validateSessionID", (sessionID) => {
-    var flag = false; //is this sID a duplicate?
+    let flag = false; //is this sID a duplicate?
     data.forEach((dataCell) => {
       if (dataCell[0] == sessionID) {
         flag = true;
@@ -482,12 +533,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sessionLeave", (studentData) => { //for students who disconnect while inside a session
-    var sessionData = findSessionByID(data, studentData.sessionID);
+    let sessionData = findSessionByID(data, studentData.sessionID);
     if (sessionData) {
-      console.log(studentData.token);
       verify(studentData.token, "student").then((payload) => {
         sessionData.studentList = arrayRemove(sessionData.studentList, payload.name);
-        var currentActionArray = sessionData.userActions.sessionLeave;
+        let currentActionArray = sessionData.userActions.sessionLeave;
         if (!currentActionArray.includes(payload.userID)) {
           currentActionArray.push(payload.userID);
           //remove the student id from all student actions; they left so they should be able to do them again
@@ -525,10 +575,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("studentReady", (studentData) => { //when a student ready up
-    var sessionData = findSessionByID(data, studentData.sessionID);
+    let sessionData = findSessionByID(data, studentData.sessionID);
     if (sessionData) {
       verify(studentData.token, "student").then((payload) => {
-        var currentActionArray = sessionData.userActions.studentReady;
+        let currentActionArray = sessionData.userActions.studentReady;
         if (!currentActionArray.includes(payload.userID)) {
           currentActionArray.push(payload.userID);
           socket.broadcast.emit("updateTeacherInfo", {
@@ -543,6 +593,7 @@ io.on("connection", (socket) => {
         }
       }).catch(() => {
         socket.emit("sessionReject", "invalidUserAction");
+        console.log("invalid user action, after duplicate ready");
       });
     }
   });

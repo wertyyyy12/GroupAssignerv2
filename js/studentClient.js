@@ -1,8 +1,8 @@
 
 $(document).ready(function(){
     // $("#hi").html(sessionStorage.getItem("studentName"));
-    var myName = sessionStorage.getItem("studentName");
-    var idToken = sessionStorage.getItem("userToken");
+    let myName = sessionStorage.getItem("studentName");
+    let idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
     // sessionStorage.removeItem("userToken");
@@ -19,17 +19,17 @@ $(document).ready(function(){
         $("#studentName").html(`Name: ${myName}`);
     }
 
-    $("#studentName").html(`Name: ${myName}`);
+    $("#studentName").html(`Name: ${myName}`); //remove on prod
     var socket = io();
-    var mySessionID;
+    let mySessionID;
 
-    var addedStudents = [];
-    var sessionEnded = false;
-    var ready = false;
-    var inSession = false;
+    let addedStudents = [];
+    let sessionEnded = false;
+    let ready = false;
+    let inSession = false;
 
-    var myMaxStudents;
-    var selections = 0;
+    let myMaxStudents;
+    let selections = 0;
 
 
     // //prevents duplicate notifications from showing up (no trolling lol)
@@ -39,7 +39,7 @@ $(document).ready(function(){
     // };
 
     function arrayRemove(array, element) {
-        var arrayCopy = JSON.parse(JSON.stringify(array));
+        let arrayCopy = JSON.parse(JSON.stringify(array));
         return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
     }
 
@@ -47,13 +47,13 @@ $(document).ready(function(){
         switch (reason) {
             case "invalidSessionID":
                 toastr.error("Invalid Session ID");
-            
+                break;
             case "duplicateLogin":
                 toastr.warning("Duplicate login blocked");
-
+                break;  
             case "invalidUserAction":
                 toastr.warning("Invalid User Action");
-
+                break;  
             case "invalidPrefs":
                 toastr.warning("Prefrences rejected");
         }
@@ -155,10 +155,10 @@ $(document).ready(function(){
     });
 
     socket.on("clientSessionEnd", function(data) { //data: sessionID, disconnect
-        var sessionID = data.sessionID;
+        let sessionID = data.sessionID;
         if (mySessionID == sessionID) { //if this event is for me, the person that entered the session
             if (!data.disconnect) {
-                    var myPrefs = []; //prepare to send data to server
+                    let myPrefs = []; //prepare to send data to server
                     $("input[type=checkbox]").each(function() {
                         if ($(this).is(":checked")) {
                             myPrefs.push($(this).val());
@@ -188,7 +188,7 @@ $(document).ready(function(){
     });
 
     socket.on("GetGroups", function(data) {
-        var groups = data.groups;
+        let groups = data.groups;
         if (data.sessionID == mySessionID) {
             groups.forEach((group, index) => {
                 $("#groupsList").append(`
@@ -233,7 +233,7 @@ $(document).ready(function(){
         $("input[type=checkbox]").each(function() {
             $(this).prop("disabled", true);
             if ($(this).is(":checked")) {
-                var checkedLabel = $(`label[for="${$(this).attr("id")}"]`)
+                let checkedLabel = $(`label[for="${$(this).attr("id")}"]`)
                 checkedLabel.css("color", "green");
                 checkedLabel.css("font-weight", "bold");
             }

@@ -1,14 +1,13 @@
 
 $(document).ready(function () {
     var socket = io();
-    var studentsReady = 0;
-    var readyList = [];
-    var myName = sessionStorage.getItem("teacherName");
-    var idToken = sessionStorage.getItem("userToken");
+    let studentsReady = 0;
+    let readyList = [];
+    let myName = sessionStorage.getItem("teacherName");
+    let idToken = sessionStorage.getItem("userToken");
 
-    var groups;
-    var emailAdresses;
-    var numStudents;
+    let groups;
+    let emailAdresses;
     // console.log(process);
     //temporary diversion to avoid tampering (by no means impossible)
     // sessionStorage.removeItem("teacherName");
@@ -25,7 +24,7 @@ $(document).ready(function () {
         $("#teacherName").html(`Teacher Name: ${myName}`);
     }
 
-    $("#teacherName").html(`Teacher Name: ${myName}`);
+    $("#teacherName").html(`Teacher Name: ${myName}`); //remove on prod
     //prevents duplicate notifications from showing up (no trolling lol)
     toastr.options = {
         "preventDuplicates": true,
@@ -33,15 +32,15 @@ $(document).ready(function () {
     };
 
     function arrayRemove(array, element) {
-        var arrayCopy = JSON.parse(JSON.stringify(array));
+        let arrayCopy = JSON.parse(JSON.stringify(array));
         return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
     }
 
     function makeid(length) { //ty SO
-        var result = "";
-        var characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
+        let result = "";
+        let characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+        let charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
 
@@ -51,7 +50,7 @@ $(document).ready(function () {
 
 
 
-    var mySessionID = makeid(7);
+    let mySessionID = makeid(7);
     socket.emit("validateSessionID", mySessionID);
 
     socket.on("sIDvalidationResult", (result) => {
@@ -193,12 +192,12 @@ $(document).ready(function () {
     //copy button functionality
     $("#copy-button").tooltip();
     $('#copy-button').click(function() {
-    var textArea = document.createElement("textarea");
+    let textArea = document.createElement("textarea");
     textArea.value = mySessionID;
     document.body.appendChild(textArea);       
     textArea.select();
     try {
-        var success = document.execCommand('copy');
+        let success = document.execCommand('copy');
         if (success) {
             $("#copy-button").attr('data-original-title', "Copied!").tooltip('show');
             setTimeout(() => {$("#copy-button").removeAttr("data-original-title")}, 1000);
@@ -226,7 +225,7 @@ $(document).ready(function () {
                 if ($("#numberOfGroups").val() >= 2) {
                     socket.emit("sessionCreate", {
                         sessionID: mySessionID,
-                        numGroups: $("#groupSize").val(), 
+                        numGroups: $("#numberOfGroups").val(), 
                         token: idToken
                     });
                 }
@@ -240,10 +239,18 @@ $(document).ready(function () {
 
                 $("#sID").prop("disabled", true);
                 $("#groupSize").prop("disabled", true);
+                $("#numberOfGroups").prop("disabled", true);
+
                 $("#startSession").css("display", "none");
 
                 $("#sIDindicator").html("<b>Session ID: </b>" + mySessionID);
-                $("#gSizeindicator").html("<b>Group Size: </b>" + $("#groupSize").val());
+                if ($("#groupSize").val() >= 2) {
+                    $("#gInfoindicator").html("<b>Group Size: </b>" + $("#groupSize").val());
+                }
+
+                if ($("#numberOfGroups").val() >= 2) {
+                    $("#gInfoindicator").html("<b>Number of Groups: </b>" + $("#numberOfGroups").val());
+                }
 
 
                 $("#endSession").css("display", "inline");
