@@ -50,7 +50,8 @@ data (each dataCell) is stored like
     studentList: *array*,
     prefs: *array*,
     userActions: *dictionary*,
-    emailAddresses: *dictionary*
+    emailAddresses: *dictionary*,
+    maxSelections: *number*
   }
 
 */
@@ -80,180 +81,236 @@ function checkDuplicates(array) {
 
 /*
 constraintType can be either:
-  "groupSize": the number of people in each group
-  "numGroups": the total number of groups to be formed
+"groupSize": the number of people in each group
+"numGroups": the total number of groups to be formed
 */
 function findOptimum(constraintType, constraint, studentList, prefs) {
 
   function splitIntoGroups(constraintType, constraint, studentList) {
-    let groupSize;
-    let numGroups;
-    if (constraintType == "groupSize") {
-       groupSize = constraint;
-       numGroups = Math.ceil(studentList.length / groupSize);
-    }
-
-    if (constraintType == "numGroups") {
-       groupSize = Math.ceil(studentList.length / constraint);
-       numGroups = constraint;
-    }
-
-
-
-    let splitGroups = [];
-
-    for (let i = 0; i < numGroups; i++) {
-      splitGroups.push([]);
-    }
-
-    let j = 0;
-    for (let i = 0; i < studentList.length; i++) {
-      if (splitGroups[j].length >= groupSize) {
-        j++;
+      let groupSize;
+      let numGroups;
+      if (constraintType == "groupSize") {
+          groupSize = constraint;
+          numGroups = Math.ceil(studentList.length / groupSize);
       }
-      splitGroups[j].push(studentList[i]);
-    }
 
-    return splitGroups;
+      if (constraintType == "numGroups") {
+          groupSize = Math.ceil(studentList.length / constraint);
+          numGroups = constraint;
+      }
+
+
+
+      let splitGroups = [];
+
+      for (let i = 0; i < numGroups; i++) {
+          splitGroups.push([]);
+      }
+
+      let j = 0;
+      for (let i = 0; i < studentList.length; i++) {
+          if (splitGroups[j].length >= groupSize) {
+              j++;
+          }
+          splitGroups[j].push(studentList[i]);
+      }
+
+      return splitGroups;
   }
 
 
   function findWanting(person, prefs) { //find who wants a certain person in their group
-    let people = [];
-    prefs.forEach((pref) => {
-      let student = pref[0];
-      let studentPrefs = pref[1];
+      let people = [];
+      prefs.forEach((pref) => {
+          let student = pref[0];
+          let studentPrefs = pref[1];
 
-      if (studentPrefs.includes(person)) {
-        people.push(student);
-      }
-    });
+          if (studentPrefs.includes(person)) {
+              people.push(student);
+          }
+      });
 
-    return people;
+      return people;
 
   }
 
   function findStudentPrefs(student, prefs) {
-    let studentPrefs = false;
-    prefs.forEach((pref) => {
-      if (pref[0] == student) {
-        studentPrefs = pref;
-      }
-    });
+      let studentPrefs = false;
+      prefs.forEach((pref) => {
+          if (pref[0] == student) {
+              studentPrefs = pref;
+          }
+      });
 
-    return studentPrefs;
+      return studentPrefs;
   }
 
   function swapTwoPeople(sG, studentA, studentB) {
 
-    let splitGroups = JSON.parse(JSON.stringify(sG));
-    let Agroup = splitGroups.find(group => group.includes(studentA));
-    let Bgroup = splitGroups.find(group => group.includes(studentB));
+      let splitGroups = JSON.parse(JSON.stringify(sG));
+      let Agroup = splitGroups.find(group => group.includes(studentA));
+      let Bgroup = splitGroups.find(group => group.includes(studentB));
 
-    if (Agroup == Bgroup) {
+      if (Agroup == Bgroup) {
+          return splitGroups;
+      }
+
+      let Aindex = splitGroups.indexOf(Agroup);
+      let Bindex = splitGroups.indexOf(Bgroup);
+
+
+      Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
+      Bgroup = arrayRemove(Bgroup, studentB);
+
+      Bgroup.push(studentA); //shove them in different groups
+      Agroup.push(studentB);
+
+      splitGroups[Aindex] = Agroup;
+      splitGroups[Bindex] = Bgroup;
+
       return splitGroups;
-    }
-
-    let Aindex = splitGroups.indexOf(Agroup);
-    let Bindex = splitGroups.indexOf(Bgroup);
-
-
-    Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
-    Bgroup = arrayRemove(Bgroup, studentB);
-
-    Bgroup.push(studentA); //shove them in different groups
-    Agroup.push(studentB);
-
-    splitGroups[Aindex] = Agroup;
-    splitGroups[Bindex] = Bgroup;
-
-    return splitGroups;
   }
 
-  let splitGroups = splitIntoGroups(constraintType, constraint, studentList);
-  for (let i = 0; i < 2; i++) {
-    prefs.forEach((pref) => {
-      let student = pref[0];
-      let studentPrefs = pref[1];
-      let studentGroup = splitGroups.find(group => group.includes(student));
+  function shuffleArray(array) {
+      let arrayCopy = array.slice(0);
+      for (let i = arrayCopy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arrayCopy[i], arrayCopy[j]] = [arrayCopy[j], arrayCopy[i]];
+      }
 
-      studentPrefs.forEach((person) => {
-        let personGroup = splitGroups.find(group => group.includes(person));
+      return arrayCopy;
+  }
 
-        //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
-        let swapPeople = arrayRemove(personGroup, person);
+  function evaluateGroupSet(groups, prefs) {
+      let cost = 0; //# of student prefrences NOT fulfilled
+      let numPrefrences = 0;
+      prefs.forEach((pref) => {
 
-        swapPeople.forEach((swapPerson) => { //for every person to swap with
-          let gain = 0;
-          //student -> A, swapPerson -> B 
-          //A group = studentGroup, B group = personGroup (same as swap group)
-          //Aprefs = studentPrefs, Bprefs = Bprefs
-          let wantingA = findWanting(student, prefs);
-          let wantingB = findWanting(swapPerson, prefs);
-          let Bprefs = findStudentPrefs(swapPerson, prefs)[1];
-
-          personGroup.forEach((Bperson) => {
-            if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
-              gain--;
-            }
-
-            if (wantingA.includes(Bperson)) { //somone in B"s group wants A
-              gain++;
-            }
-
-            if (Bprefs.includes(Bperson)) { //B wanted someone in group B
-              gain--;
-            }
-
-            if (studentPrefs.includes(Bperson)) { //A wants someone in B group
-              gain++;
-            }
+          let student = pref[0];
+          let studentGroup = groups.find(group => group.includes(student));
+          pref[1].forEach((person) => {
+              numPrefrences++;
+              if (!studentGroup.includes(person)) {
+                  cost++;
+              }
           });
-
-          studentGroup.forEach((Aperson) => {
-            if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
-              gain--;
-            }
-
-            if (wantingB.includes(Aperson)) { //somone in A"s group wants B
-              gain++;
-            }
-
-            if (studentPrefs.includes(Aperson)) { //A wanted someone in their group
-              gain--;
-            }
-
-            if (Bprefs.includes(Aperson)) { //B wants someone in A group
-              gain++;
-            }
-          });
-
-          if (gain > 0) {
-            splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
-            //swap
-          }
-
-          // studentGroup.forEach((Aperson) => {
-          //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
-          //     gain--;
-          //   }
-          // });
-
-        });
 
       });
-    });
+
+      return {
+          cost: cost,
+          numPrefrences: numPrefrences
+      };
   }
 
-  if (splitGroups[splitGroups.length - 1].length < 2) { //shove a lone student into a group
-    if (splitGroups[splitGroups.length - 1][0]) { //this will happen if numGroups > studentList.length (aka troll input)
-      splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
-      splitGroups.pop();
-    }
+
+  //MAIN LOOP
+  let bestCost = 9999;
+  let bestGroup;
+  let numPrefrences;
+  for (let j = 0; j <= studentList.length * 2; j++) {
+      let randStudentList = shuffleArray(studentList);
+      splitGroups = splitIntoGroups(constraintType, constraint, randStudentList);
+      for (let i = 0; i < 2; i++) { //twice for good measure
+          prefs.forEach((pref) => { //for every student prefrence
+              let student = pref[0];
+              let studentPrefs = pref[1];
+              let studentGroup = splitGroups.find(group => group.includes(student));
+
+              studentPrefs.forEach((person) => {
+                  let personGroup = splitGroups.find(group => group.includes(person));
+
+                  //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
+                  let swapPeople = arrayRemove(personGroup, person);
+
+                  swapPeople.forEach((swapPerson) => { //for every person to swap with
+                      let gain = 0;
+                      //student -> A, swapPerson -> B 
+                      //A group = studentGroup, B group = personGroup (same as swap group)
+                      //Aprefs = studentPrefs, Bprefs = Bprefs
+                      let wantingA = findWanting(student, prefs);
+                      let wantingB = findWanting(swapPerson, prefs);
+                      let Bprefs = findStudentPrefs(swapPerson, prefs)[1];
+
+                      personGroup.forEach((Bperson) => {
+                          if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
+                              gain--;
+                          }
+
+                          if (wantingA.includes(Bperson)) { //somone in B"s group wants A
+                              gain++;
+                          }
+
+                          if (Bprefs.includes(Bperson)) { //B wanted someone in group B
+                              gain--;
+                          }
+
+                          if (studentPrefs.includes(Bperson)) { //A wants someone in B group
+                              gain++;
+                          }
+                      });
+
+                      studentGroup.forEach((Aperson) => {
+                          if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
+                              gain--;
+                          }
+
+                          if (wantingB.includes(Aperson)) { //somone in A"s group wants B
+                              gain++;
+                          }
+
+                          if (studentPrefs.includes(Aperson)) { //A wanted someone in their group
+                              gain--;
+                          }
+
+                          if (Bprefs.includes(Aperson)) { //B wants someone in A group
+                              gain++;
+                          }
+                      });
+
+                      if (gain > 0) {
+                          splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
+                          //swap
+                      }
+
+                      // studentGroup.forEach((Aperson) => {
+                      //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
+                      //     gain--;
+                      //   }
+                      // });
+
+                  });
+
+              });
+          });
+      }
+
+
+
+      if (splitGroups[splitGroups.length - 1].length < 2) { //shove a lone student into a group
+          if (splitGroups[splitGroups.length - 1][0]) { //this will happen if numGroups > studentList.length (aka troll input)
+              splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
+              splitGroups.pop();
+          }
+      }
+
+      splitGroups = splitGroups.filter(group => group.length > 0); //filter out any empty groups
+
+      let evaluationData = evaluateGroupSet(splitGroups, prefs);
+      groupCost = evaluationData.cost;
+      numPrefrences = evaluationData.numPrefrences;
+      if (groupCost < bestCost) {
+          bestCost = groupCost;
+          bestGroup = splitGroups;
+      }
+
   }
 
-  splitGroups = splitGroups.filter(group => group.length > 0); //filter out any empty groups
-  return splitGroups;
+  return {
+      best: bestGroup,
+      cost: bestCost,
+      numPrefs: numPrefrences
+  };
 }
 
 
@@ -267,24 +324,6 @@ app.use("/html", express.static(__dirname + "/html"));
 
 app.use(express.static(__dirname + "/js"));
 app.use("/js", express.static(__dirname + "/js"));
-
-function findElementInArray(array, desiredElement, subIndex) {
-  let found = false;
-  array.forEach(function (element) {
-    if (subIndex === undefined) {
-      if (element == desiredElement) {
-        found = element;
-      }
-    }
-
-    else {
-      if (element[subIndex] == desiredElement) {
-        found = element;
-      }
-    }
-  });
-  return found;
-}
 
 function findSessionByID(data, sessionID) {
   return data.find(session => session.sessionID == sessionID);
@@ -314,7 +353,8 @@ io.on("connection", (socket) => {
         studentList: [],
         prefs: [],
         emailAddresses: {}, 
-        userActions: templateUserActions
+        userActions: templateUserActions,
+        maxSelections: teacherData.maxSelections
       };
 
 
@@ -343,22 +383,11 @@ io.on("connection", (socket) => {
           sessionData.studentList.push(payload.name);
           sessionData.userActions.sessionJoin.push(payload.userID);
           sessionData.userActions.sessionLeave = arrayRemove(sessionData.userActions.sessionLeave, payload.userID);
-          let groupSize, numGroups;
-
-          if (sessionData.groupSize) {
-            groupSize = sessionData.groupSize;
-            numGroups = Math.ceil(sessionData.studentList.length / groupSize);
-          }
-
-          if (sessionData.numGroups) {
-            numGroups = sessionData.numGroups;
-            groupSize = Math.ceil(sessionData.studentList.length / numGroups);
-          }
 
           console.log("student user ID " + payload.userID + " joined");
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
-            maxSelections: Math.ceil(Math.max(groupSize, numGroups) / 2)
+            maxSelections: sessionData.maxSelections
           });
           io.emit("updateStudentList", {
             sessionData: sessionData,
@@ -493,11 +522,21 @@ io.on("connection", (socket) => {
               constraintValue = sessionData.numGroups;
             }
             if (sessionData.prefs.length > 1) {
+              let groupData = findOptimum(constraint, constraintValue, sessionData.studentList, sessionData.prefs);
               io.emit("GetGroups", {
                 sessionID: sessionData.sessionID,
-                groups: findOptimum(constraint, constraintValue, sessionData.studentList, sessionData.prefs),
+                groups: groupData.best,
                 prefs: sessionData.prefs
               });
+
+              socket.broadcast.emit("updateTeacherInfo", {
+                cost: groupData.cost,
+                numPrefs: groupData.numPrefs,
+                sessionID: sessionData.sessionID,
+                type: "GroupInfo"
+              });
+
+
             }
             data = arrayRemove(data, sessionData);
           }

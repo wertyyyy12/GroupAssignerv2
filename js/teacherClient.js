@@ -24,7 +24,13 @@ $(document).ready(function () {
         $("#teacherName").html(`Teacher Name: ${myName}`);
     }
 
-    $("#teacherName").html(`Teacher Name: ${myName}`); //remove on prod
+    //REMOVE ON PRODUCTION.
+    $("#teacherName").html(`Teacher Name: ${myName}`); 
+    
+    $("#maxSelections").val(Math.floor(Math.random() * 4) + 1);
+
+
+
     //prevents duplicate notifications from showing up (no trolling lol)
     toastr.options = {
         "preventDuplicates": true,
@@ -130,6 +136,12 @@ $(document).ready(function () {
                     }
                 }
             }
+
+            if (data.type == "GroupInfo") {
+                console.log(data);
+                let accomodationPercent = ((data.numPrefs - data.cost) / (data.numPrefs)) * 100;
+                $("#prefsFulfilled").html(`<b>${data.numPrefs - data.cost}</b> out of ${data.numPrefs} prefrences fulfilled. (${accomodationPercent}%)`);
+            }
         }
 
     });
@@ -154,7 +166,7 @@ $(document).ready(function () {
                 let student = studentPref[0];
 
                 //build a string with the student prefrences
-                let studentPrefString = studentPref[1].join().replace(",", ", ");
+                let studentPrefString = studentPref[1].join().replaceAll(",", ", ");
                 let tdClass = "";
 
                 //change background to green if that student was ready
@@ -163,7 +175,7 @@ $(document).ready(function () {
                 }
 
                 $("studentPrefsList").css("display", "inline");
-                //add the table data to the table
+                //add the prefrence table data to the table
                 $("#studentPrefsList").append(`
                     <tr>
                         <td class=${tdClass}>${student}</td>
@@ -212,13 +224,15 @@ $(document).ready(function () {
     });
 
     $("#startSession").click(function () {
-        if (mySessionID != "") {
+        if ((mySessionID != "") && ($("#maxSelections").val())) {
             if ( ($("#groupSize").val() != "") ||  ($("#numberOfGroups").val() != "") ) { //if either field is filled
                 if ($("#groupSize").val() >= 2) {
                     socket.emit("sessionCreate", {
                         sessionID: mySessionID,
                         groupSize: $("#groupSize").val(),
-                        token: idToken
+                        token: idToken,
+                        maxSelections: $("#maxSelections").val()
+
                     });
                 }
 
@@ -226,7 +240,8 @@ $(document).ready(function () {
                     socket.emit("sessionCreate", {
                         sessionID: mySessionID,
                         numGroups: $("#numberOfGroups").val(), 
-                        token: idToken
+                        token: idToken,
+                        maxSelections: $("#maxSelections").val()
                     });
                 }
 
@@ -273,7 +288,6 @@ $(document).ready(function () {
             token: idToken
         });   
 
-        console.log(idToken);
         $("#saveGroups").css("display", "inline");
         toastr.success(`Ended Session ID "${mySessionID}"`);
     });
@@ -313,6 +327,14 @@ $(document).ready(function () {
         if (this.value <= 1) {
             this.value = 2;
         }
+    });
+    
+    $("#groupSize").change(function() {  //change the other field so that they both cant be filled at the same time
+        $("#numberOfGroups").val("");
+    });
+
+    $("#numberOfGroups").change(function() {  //change the other field so that they both cant be filled at the same time
+        $("#groupSize").val("");
     });
 
     window.onunload = function () {
