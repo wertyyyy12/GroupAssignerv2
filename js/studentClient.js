@@ -1,5 +1,5 @@
 
-$(document).ready(function(){
+$(document).ready(function () {
     // $("#hi").html(sessionStorage.getItem("studentName"));
     let myName = sessionStorage.getItem("studentName");
     let idToken = sessionStorage.getItem("userToken");
@@ -43,17 +43,17 @@ $(document).ready(function(){
         return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
     }
 
-    socket.on("sessionReject", function(reason) {
+    socket.on("sessionReject", function (reason) {
         switch (reason) {
             case "invalidSessionID":
                 toastr.error("Invalid Session ID");
                 break;
             case "duplicateLogin":
                 toastr.warning("Duplicate login blocked");
-                break;  
+                break;
             case "invalidUserAction":
                 toastr.warning("Invalid User Action");
-                break;  
+                break;
             case "invalidPrefs":
                 toastr.warning("Prefrences rejected");
         }
@@ -71,13 +71,13 @@ $(document).ready(function(){
 
     });
 
-    socket.on("sessionSuccess", function(data) {
+    socket.on("sessionSuccess", function (data) {
         toastr.success("Joined Session ID '" + data.sessionID + "'");
         mySessionID = data.sessionID;
         inSession = true;
 
         myMaxStudents = data.maxSelections;
-        if (data.maxSelections == 1) { 
+        if (data.maxSelections == 1) {
             $("#maxStudents").html(`Select a maximum of 1 student.`);
         }
 
@@ -87,132 +87,128 @@ $(document).ready(function(){
 
         $("#selectionReady").css("display", "inline");
 
-        
+
 
     });
 
-    socket.on("updateStudentList", function(data) { //data: sessionData, name, type
-        if (mySessionID == data.sessionData.sessionID) {
-            if (data.type == "add") {
-                console.log("adding student list: ")
-                console.log(data.sessionData.studentList);
-                data.sessionData.studentList.forEach(studentName => {
-                    if (myName != studentName) {
-                        if (!addedStudents.includes(studentName)){
-                            $("#studentList").append(`
+    socket.on("updateStudentList", function (data) { //data: sessionData, name, type
+        if (data.type == "add") {
+            console.log("adding student list: ")
+            console.log(data.sessionData.studentList);
+            data.sessionData.studentList.forEach(studentName => {
+                if (myName != studentName) {
+                    if (!addedStudents.includes(studentName)) {
+                        $("#studentList").append(`
                             <input type="checkbox" id="${studentName}" name="${studentName}" value="${studentName}">
                             <label for="${studentName}" onclick="$(#${studentName}).prop( "checked", !$(#${studentName}).is(":checked") );">${studentName}</label><br>
                             `);
 
-                            if (ready) {
-                                document.getElementById(`${studentName}`).disabled = true;
+                        if (ready) {
+                            document.getElementById(`${studentName}`).disabled = true;
+                        }
+
+                        document.getElementById(`${studentName}`).addEventListener("click", function () { //for some reason the jquery equivalent starts acting up when i give it this so 
+
+                            if (this.checked) {
+                                selections++;
+                                if (selections > myMaxStudents) {
+                                    this.checked = false;
+                                    toastr.warning("Max student selections reached");
+                                    selections--;
+                                }
                             }
-                            
-                            document.getElementById(`${studentName}`).addEventListener("click", function() { //for some reason the jquery equivalent starts acting up when i give it this so 
 
-                                if (this.checked) {
-                                    selections++;
-                                    if (selections > myMaxStudents) {
-                                        this.checked = false;
-                                        toastr.warning("Max student selections reached");
-                                        selections--;
-                                    }
-                                }
+                            else if (!this.checked) {
+                                selections--;
+                            }
 
-                                else if (!this.checked){
-                                    selections--;   
-                                }
 
-                                
-                            });
-                            addedStudents.push(studentName);
-                        }
-
-                        else {
-                            console.log("student already addded");
-                            console.log(addedStudents);
-                        }
+                        });
+                        addedStudents.push(studentName);
                     }
 
                     else {
-                        console.log("skipped over my own name: " + myName);
+                        console.log("student already addded");
+                        console.log(addedStudents);
                     }
-                });
-
-                // socket.emit("Get", mySessionID);
-                //asdasdasdasd
-                $("#joinSession").prop("disabled", true);
-            }
-
-            if (data.type == "remove") {
-                $(`input[id="${data.name}"]`).remove();
-                $(`label[for = "${data.name}"] + br`).remove(); //remove the br after the label cuz apparently that is there
-                $(`label[for = "${data.name}"]`).remove();
-
-                addedStudents = arrayRemove(addedStudents, data.name);
-            }
-        }
-    });
-
-    socket.on("clientSessionEnd", function(data) { //data: sessionID, disconnect
-        let sessionID = data.sessionID;
-        if (mySessionID == sessionID) { //if this event is for me, the person that entered the session
-            if (!data.disconnect) {
-                    let myPrefs = []; //prepare to send data to server
-                    $("input[type=checkbox]").each(function() {
-                        if ($(this).is(":checked")) {
-                            myPrefs.push($(this).val());
-                        }
-                    });
-                    socket.emit("studentSendData", {
-                        prefs: [myName, myPrefs],
-                        sessionID: mySessionID,
-                        token: idToken
-                    });
-                    toastr.info("This session has ended.");
-                    sessionEnded = true;
-                    $("#studentList").empty();
-                    $("#maxStudents").empty();
-                    $("#selectionReady").prop("disabled", true);
-            }
-
-            else { //this session was a result of teacher disconnect
-                if (!sessionEnded) { //if the session has not already ended by normal means
-                    toastr.info("Session aborted by teacher.");
-                    setTimeout(function() { location.reload(); }, 1500);
                 }
+
+                else {
+                    console.log("skipped over my own name: " + myName);
+                }
+            });
+
+            // socket.emit("Get", mySessionID);
+            //asdasdasdasd
+            $("#joinSession").prop("disabled", true);
+        }
+
+        if (data.type == "remove") {
+            $(`input[id="${data.name}"]`).remove();
+            $(`label[for = "${data.name}"] + br`).remove(); //remove the br after the label cuz apparently that is there
+            $(`label[for = "${data.name}"]`).remove();
+
+            addedStudents = arrayRemove(addedStudents, data.name);
+        }
+
+    });
+
+    socket.on("clientSessionEnd", function (data) { //data: sessionID, disconnect
+        if (!data.disconnect) {
+            let myPrefs = []; //prepare to send data to server
+            $("input[type=checkbox]").each(function () {
+                if ($(this).is(":checked")) {
+                    myPrefs.push($(this).val());
+                }
+            });
+            socket.emit("studentSendData", {
+                prefs: [myName, myPrefs],
+                sessionID: mySessionID,
+                token: idToken
+            });
+            toastr.info("This session has ended.");
+            sessionEnded = true;
+            $("#studentList").empty();
+            $("#maxStudents").empty();
+            $("#selectionReady").prop("disabled", true);
+        }
+
+        else { //this session was a result of teacher disconnect
+            if (!sessionEnded) { //if the session has not already ended by normal means
+                toastr.info("Session aborted by teacher.");
+                setTimeout(function () { location.reload(); }, 1500);
             }
         }
 
 
+
     });
 
-    socket.on("GetGroups", function(data) {
+    socket.on("GetGroups", function (data) {
         let groups = data.groups;
-        if (data.sessionID == mySessionID) {
-            groups.forEach((group, index) => {
-                $("#groupsList").append(`
+        groups.forEach((group, index) => {
+            $("#groupsList").append(`
                 <div id="GroupList${index + 1}div" style="display: inline-block; padding: 7px;">
                 <h3 id="GroupList${index + 1}heading">Group ${index + 1} </h3>
                 <ul id="GroupList${index + 1}"></ul>
                 </div>
                 `);
 
-                group.forEach((person) => {
-                    $(`#GroupList${index + 1}`).append(`<li>${person}</li>`);
-                    if (person == myName) {
-                        $(`#GroupList${index + 1}`).css("color", "green");
-                        $(`#GroupList${index + 1}`).parent().css("border", "1px solid green");
+            group.forEach((person) => {
+                $(`#GroupList${index + 1}`).append(`<li>${person}</li>`);
+                if (person == myName) {
+                    $(`#GroupList${index + 1}`).css("color", "green");
+                    $(`#GroupList${index + 1}`).parent().css("border", "1px solid green");
 
-                        $(`#GroupList${index + 1}heading`).css("color", "green");
-                    }
-                });
+                    $(`#GroupList${index + 1}heading`).css("color", "green");
+                }
             });
-        }
+        });
+
     });
 
 
-    $("#joinSession").click(function() {
+    $("#joinSession").click(function () {
         if ($("#sID").val() != "") {
             if (myName != "") {
                 socket.emit("sessionJoin", {
@@ -223,14 +219,14 @@ $(document).ready(function(){
         }
     });
 
-    $("#selectionReady").click(function() {
+    $("#selectionReady").click(function () {
         $("#selectionReady").prop("disabled", true); //disable the button itself
         socket.emit("studentReady", { //tell the server to tell the teacher that the student is ready
             sessionID: mySessionID,
             token: idToken
         });
 
-        $("input[type=checkbox]").each(function() {
+        $("input[type=checkbox]").each(function () {
             $(this).prop("disabled", true);
             if ($(this).is(":checked")) {
                 let checkedLabel = $(`label[for="${$(this).attr("id")}"]`)
@@ -242,10 +238,10 @@ $(document).ready(function(){
         ready = true;
 
     });
-    
-    
 
-    window.onunload = function() {
+
+
+    window.onunload = function () {
         if (inSession) {
             socket.emit("sessionLeave", {
                 sessionID: $("#sID").val(),

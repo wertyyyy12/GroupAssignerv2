@@ -3,8 +3,6 @@
     -student choices are reasonable (not nonsense that doesnt exist)
     -num choices <= allowed choices
 
--send stuff direct to teacher
--send stuff to a pool of students instead of everyone
 -validations based on tokens instead of sessionID
 
 ASK:

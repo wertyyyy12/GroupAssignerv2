@@ -404,17 +404,16 @@ io.on("connection", (socket) => {
 
           sessionData.studentSocketIDs.push(socket.id);
           sendToStudents(sessionData.studentSocketIDs, "updateStudentList", {
-            sessionData: sessionData,
             name: payload.name,
-            type: "add"
+            type: "add",
+            sessionData: sessionData
           });
 
 
 
           sessionData.emailAddresses[`${payload.name}`] = payload.email;
           io.to(teacherSocketID).emit("updateTeacherInfo", { //tells teachers to update student leftover counters
-            studentList: sessionData.studentList,
-            sessionID: studentData.sessionID
+            studentList: sessionData.studentList
           });
 
           let leftOverStudents = sessionData.studentList.length % sessionData.groupSize;
@@ -431,7 +430,6 @@ io.on("connection", (socket) => {
 
               io.to(teacherSocketID).emit("updateTeacherInfo", { //tells teachers to update student leftover counters
                 violation: true,
-                sessionID: studentData.sessionID,
                 leftOver: violationGroupSize
               });
             }
@@ -439,8 +437,7 @@ io.on("connection", (socket) => {
 
           else {
             io.to(teacherSocketID).emit("updateTeacherInfo", {
-              violation: false,
-              sessionID: studentData.sessionID
+              violation: false
             });
           }
 
@@ -482,7 +479,6 @@ io.on("connection", (socket) => {
           if (!teacherData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
 
             sendToStudents(studentSocketIDs, "clientSessionEnd", {
-              sessionID: sessionID,
               disconnect: false
             });
           }
@@ -494,7 +490,6 @@ io.on("connection", (socket) => {
 
 
             sendToStudents(studentSocketIDs, "clientSessionEnd", {
-              sessionID: sessionID,
               disconnect: true
             });
           }
@@ -551,7 +546,6 @@ io.on("connection", (socket) => {
               copyOfsocketIDs.push(sessionData.userActions.teacher.socketID);
 
               sendToStudents(copyOfsocketIDs, "GetGroups", {
-                sessionID: sessionData.sessionID,
                 groups: groupData.best,
                 prefs: sessionData.prefs
               });
@@ -560,7 +554,6 @@ io.on("connection", (socket) => {
               io.to(teacherSocketID).emit("updateTeacherInfo", {
                 cost: groupData.cost,
                 numPrefs: groupData.numPrefs,
-                sessionID: sessionData.sessionID,
                 type: "GroupInfo"
               });
 
@@ -618,13 +611,11 @@ io.on("connection", (socket) => {
 
 
           sendToStudents(studentSocketIDs, "updateStudentList", {
-            sessionData: sessionData,
             name: payload.name,
             type: "remove"
           });
 
           io.to(teacherSocketID).emit("updateTeacherInfo", {
-            sessionID: studentData.sessionID,
             studentList: sessionData.studentList,
             name: payload.name,
             type: "studentLeave"
@@ -651,7 +642,6 @@ io.on("connection", (socket) => {
         if (!currentActionArray.includes(payload.userID)) {
           currentActionArray.push(payload.userID);
           io.to(teacherSocketID).emit("updateTeacherInfo", {
-            sessionID: studentData.sessionID,
             name: payload.name,
             type: "readyUp"
           });
