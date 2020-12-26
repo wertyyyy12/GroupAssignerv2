@@ -1,16 +1,10 @@
--see student choices
-    -number of prefrences submitted, accomadated, rejected, accomadation percent
-
--algorithm improvements
-    -randomization of initial group
-    -considering ALL swaps (?)
-
 -student rosters -> list of absent students
 -Server side input filtering
     -student choices are reasonable (not nonsense that doesnt exist)
     -num choices <= allowed choices
 
-
+-send stuff direct to teacher
+-send stuff to a pool of students instead of everyone
 -validations based on tokens instead of sessionID
 
 ASK:

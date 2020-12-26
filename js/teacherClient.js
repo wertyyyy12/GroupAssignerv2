@@ -140,6 +140,9 @@ $(document).ready(function () {
             if (data.type == "GroupInfo") {
                 console.log(data);
                 let accomodationPercent = ((data.numPrefs - data.cost) / (data.numPrefs)) * 100;
+                if (!accomodationPercent) {
+                    accomodationPercent = 0;
+                }
                 $("#prefsFulfilled").html(`<b>${data.numPrefs - data.cost}</b> out of ${data.numPrefs} prefrences fulfilled. (${accomodationPercent}%)`);
             }
         }

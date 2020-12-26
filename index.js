@@ -23,7 +23,7 @@ async function verify(token, type) {
   const username = payload['name'];
   const email = payload['email'];
   // If request specified a G Suite domain:
-  
+
   // if (type == "student") {
   //   const domain = payload['hd'];
   //   if (domain != "my.cuhsd.org") {
@@ -32,7 +32,7 @@ async function verify(token, type) {
   // }
 
   return {
-    userID: userid, 
+    userID: userid,
     name: username,
     email: email
   };
@@ -67,14 +67,14 @@ function checkDuplicates(array) {
   //stores all the values
   let bank = {};
 
-  for(let i = 0; i <= array.length; i++) {
-      // If the key is empty it fills it
-      // If the key isnt empty then we found a duplicate
-      if (!bank[array[i]] === undefined) {
-          bank[array[i]] = 1;
-      } else {
-          return true;
-      }
+  for (let i = 0; i <= array.length; i++) {
+    // If the key is empty it fills it
+    // If the key isnt empty then we found a duplicate
+    if (!bank[array[i]] === undefined) {
+      bank[array[i]] = 1;
+    } else {
+      return true;
+    }
   }
   return false;
 }
@@ -87,120 +87,120 @@ constraintType can be either:
 function findOptimum(constraintType, constraint, studentList, prefs) {
 
   function splitIntoGroups(constraintType, constraint, studentList) {
-      let groupSize;
-      let numGroups;
-      if (constraintType == "groupSize") {
-          groupSize = constraint;
-          numGroups = Math.ceil(studentList.length / groupSize);
+    let groupSize;
+    let numGroups;
+    if (constraintType == "groupSize") {
+      groupSize = constraint;
+      numGroups = Math.ceil(studentList.length / groupSize);
+    }
+
+    if (constraintType == "numGroups") {
+      groupSize = Math.ceil(studentList.length / constraint);
+      numGroups = constraint;
+    }
+
+
+
+    let splitGroups = [];
+
+    for (let i = 0; i < numGroups; i++) {
+      splitGroups.push([]);
+    }
+
+    let j = 0;
+    for (let i = 0; i < studentList.length; i++) {
+      if (splitGroups[j].length >= groupSize) {
+        j++;
       }
+      splitGroups[j].push(studentList[i]);
+    }
 
-      if (constraintType == "numGroups") {
-          groupSize = Math.ceil(studentList.length / constraint);
-          numGroups = constraint;
-      }
-
-
-
-      let splitGroups = [];
-
-      for (let i = 0; i < numGroups; i++) {
-          splitGroups.push([]);
-      }
-
-      let j = 0;
-      for (let i = 0; i < studentList.length; i++) {
-          if (splitGroups[j].length >= groupSize) {
-              j++;
-          }
-          splitGroups[j].push(studentList[i]);
-      }
-
-      return splitGroups;
+    return splitGroups;
   }
 
 
   function findWanting(person, prefs) { //find who wants a certain person in their group
-      let people = [];
-      prefs.forEach((pref) => {
-          let student = pref[0];
-          let studentPrefs = pref[1];
+    let people = [];
+    prefs.forEach((pref) => {
+      let student = pref[0];
+      let studentPrefs = pref[1];
 
-          if (studentPrefs.includes(person)) {
-              people.push(student);
-          }
-      });
+      if (studentPrefs.includes(person)) {
+        people.push(student);
+      }
+    });
 
-      return people;
+    return people;
 
   }
 
   function findStudentPrefs(student, prefs) {
-      let studentPrefs = false;
-      prefs.forEach((pref) => {
-          if (pref[0] == student) {
-              studentPrefs = pref;
-          }
-      });
+    let studentPrefs = false;
+    prefs.forEach((pref) => {
+      if (pref[0] == student) {
+        studentPrefs = pref;
+      }
+    });
 
-      return studentPrefs;
+    return studentPrefs;
   }
 
   function swapTwoPeople(sG, studentA, studentB) {
 
-      let splitGroups = JSON.parse(JSON.stringify(sG));
-      let Agroup = splitGroups.find(group => group.includes(studentA));
-      let Bgroup = splitGroups.find(group => group.includes(studentB));
+    let splitGroups = JSON.parse(JSON.stringify(sG));
+    let Agroup = splitGroups.find(group => group.includes(studentA));
+    let Bgroup = splitGroups.find(group => group.includes(studentB));
 
-      if (Agroup == Bgroup) {
-          return splitGroups;
-      }
-
-      let Aindex = splitGroups.indexOf(Agroup);
-      let Bindex = splitGroups.indexOf(Bgroup);
-
-
-      Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
-      Bgroup = arrayRemove(Bgroup, studentB);
-
-      Bgroup.push(studentA); //shove them in different groups
-      Agroup.push(studentB);
-
-      splitGroups[Aindex] = Agroup;
-      splitGroups[Bindex] = Bgroup;
-
+    if (Agroup == Bgroup) {
       return splitGroups;
+    }
+
+    let Aindex = splitGroups.indexOf(Agroup);
+    let Bindex = splitGroups.indexOf(Bgroup);
+
+
+    Agroup = arrayRemove(Agroup, studentA); //remove the students from their groups
+    Bgroup = arrayRemove(Bgroup, studentB);
+
+    Bgroup.push(studentA); //shove them in different groups
+    Agroup.push(studentB);
+
+    splitGroups[Aindex] = Agroup;
+    splitGroups[Bindex] = Bgroup;
+
+    return splitGroups;
   }
 
   function shuffleArray(array) {
-      let arrayCopy = array.slice(0);
-      for (let i = arrayCopy.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arrayCopy[i], arrayCopy[j]] = [arrayCopy[j], arrayCopy[i]];
-      }
+    let arrayCopy = array.slice(0);
+    for (let i = arrayCopy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arrayCopy[i], arrayCopy[j]] = [arrayCopy[j], arrayCopy[i]];
+    }
 
-      return arrayCopy;
+    return arrayCopy;
   }
 
   function evaluateGroupSet(groups, prefs) {
-      let cost = 0; //# of student prefrences NOT fulfilled
-      let numPrefrences = 0;
-      prefs.forEach((pref) => {
+    let cost = 0; //# of student prefrences NOT fulfilled
+    let numPrefrences = 0;
+    prefs.forEach((pref) => {
 
-          let student = pref[0];
-          let studentGroup = groups.find(group => group.includes(student));
-          pref[1].forEach((person) => {
-              numPrefrences++;
-              if (!studentGroup.includes(person)) {
-                  cost++;
-              }
-          });
-
+      let student = pref[0];
+      let studentGroup = groups.find(group => group.includes(student));
+      pref[1].forEach((person) => {
+        numPrefrences++;
+        if (!studentGroup.includes(person)) {
+          cost++;
+        }
       });
 
-      return {
-          cost: cost,
-          numPrefrences: numPrefrences
-      };
+    });
+
+    return {
+      cost: cost,
+      numPrefrences: numPrefrences
+    };
   }
 
 
@@ -209,108 +209,115 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
   let bestGroup;
   let numPrefrences;
   for (let j = 0; j <= studentList.length * 2; j++) {
-      let randStudentList = shuffleArray(studentList);
-      splitGroups = splitIntoGroups(constraintType, constraint, randStudentList);
-      for (let i = 0; i < 2; i++) { //twice for good measure
-          prefs.forEach((pref) => { //for every student prefrence
-              let student = pref[0];
-              let studentPrefs = pref[1];
-              let studentGroup = splitGroups.find(group => group.includes(student));
+    let randStudentList = shuffleArray(studentList);
+    splitGroups = splitIntoGroups(constraintType, constraint, randStudentList);
+    for (let i = 0; i < 2; i++) { //twice for good measure
+      prefs.forEach((pref) => { //for every student prefrence
+        let student = pref[0];
+        let studentPrefs = pref[1];
+        let studentGroup = splitGroups.find(group => group.includes(student));
 
-              studentPrefs.forEach((person) => {
-                  let personGroup = splitGroups.find(group => group.includes(person));
+        studentPrefs.forEach((person) => {
+          let personGroup = splitGroups.find(group => group.includes(person));
 
-                  //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
-                  let swapPeople = arrayRemove(personGroup, person);
+          //the person wants a swap; "student" wants to be in "person""s group | "student" may swap with "swapPerson" in order to do so
+          let swapPeople = arrayRemove(personGroup, person);
 
-                  swapPeople.forEach((swapPerson) => { //for every person to swap with
-                      let gain = 0;
-                      //student -> A, swapPerson -> B 
-                      //A group = studentGroup, B group = personGroup (same as swap group)
-                      //Aprefs = studentPrefs, Bprefs = Bprefs
-                      let wantingA = findWanting(student, prefs);
-                      let wantingB = findWanting(swapPerson, prefs);
-                      let Bprefs = findStudentPrefs(swapPerson, prefs)[1];
+          swapPeople.forEach((swapPerson) => { //for every person to swap with
+            let gain = 0;
+            //student -> A, swapPerson -> B 
+            //A group = studentGroup, B group = personGroup (same as swap group)
+            //Aprefs = studentPrefs, Bprefs = Bprefs
+            let wantingA = findWanting(student, prefs);
+            let wantingB = findWanting(swapPerson, prefs);
+            let Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
-                      personGroup.forEach((Bperson) => {
-                          if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
-                              gain--;
-                          }
+            personGroup.forEach((Bperson) => {
+              if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
+                gain--;
+              }
 
-                          if (wantingA.includes(Bperson)) { //somone in B"s group wants A
-                              gain++;
-                          }
+              if (wantingA.includes(Bperson)) { //somone in B"s group wants A
+                gain++;
+              }
 
-                          if (Bprefs.includes(Bperson)) { //B wanted someone in group B
-                              gain--;
-                          }
+              if (Bprefs.includes(Bperson)) { //B wanted someone in group B
+                gain--;
+              }
 
-                          if (studentPrefs.includes(Bperson)) { //A wants someone in B group
-                              gain++;
-                          }
-                      });
+              if (studentPrefs.includes(Bperson)) { //A wants someone in B group
+                gain++;
+              }
+            });
 
-                      studentGroup.forEach((Aperson) => {
-                          if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
-                              gain--;
-                          }
+            studentGroup.forEach((Aperson) => {
+              if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
+                gain--;
+              }
 
-                          if (wantingB.includes(Aperson)) { //somone in A"s group wants B
-                              gain++;
-                          }
+              if (wantingB.includes(Aperson)) { //somone in A"s group wants B
+                gain++;
+              }
 
-                          if (studentPrefs.includes(Aperson)) { //A wanted someone in their group
-                              gain--;
-                          }
+              if (studentPrefs.includes(Aperson)) { //A wanted someone in their group
+                gain--;
+              }
 
-                          if (Bprefs.includes(Aperson)) { //B wants someone in A group
-                              gain++;
-                          }
-                      });
+              if (Bprefs.includes(Aperson)) { //B wants someone in A group
+                gain++;
+              }
+            });
 
-                      if (gain > 0) {
-                          splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
-                          //swap
-                      }
+            if (gain > 0) {
+              splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
+              //swap
+            }
 
-                      // studentGroup.forEach((Aperson) => {
-                      //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
-                      //     gain--;
-                      //   }
-                      // });
+            // studentGroup.forEach((Aperson) => {
+            //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
+            //     gain--;
+            //   }
+            // });
 
-                  });
-
-              });
           });
+
+        });
+      });
+    }
+
+
+
+    if (splitGroups[splitGroups.length - 1].length < 2) { //shove a lone student into a group
+      if (splitGroups[splitGroups.length - 1][0]) { //this will happen if numGroups > studentList.length (aka troll input)
+        splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
+        splitGroups.pop();
       }
+    }
 
+    splitGroups = splitGroups.filter(group => group.length > 0); //filter out any empty groups
 
-
-      if (splitGroups[splitGroups.length - 1].length < 2) { //shove a lone student into a group
-          if (splitGroups[splitGroups.length - 1][0]) { //this will happen if numGroups > studentList.length (aka troll input)
-              splitGroups[splitGroups.length - 2].push(splitGroups[splitGroups.length - 1][0]);
-              splitGroups.pop();
-          }
-      }
-
-      splitGroups = splitGroups.filter(group => group.length > 0); //filter out any empty groups
-
-      let evaluationData = evaluateGroupSet(splitGroups, prefs);
-      groupCost = evaluationData.cost;
-      numPrefrences = evaluationData.numPrefrences;
-      if (groupCost < bestCost) {
-          bestCost = groupCost;
-          bestGroup = splitGroups;
-      }
+    let evaluationData = evaluateGroupSet(splitGroups, prefs);
+    groupCost = evaluationData.cost;
+    numPrefrences = evaluationData.numPrefrences;
+    if (groupCost < bestCost) {
+      bestCost = groupCost;
+      bestGroup = splitGroups;
+    }
 
   }
 
   return {
-      best: bestGroup,
-      cost: bestCost,
-      numPrefs: numPrefrences
+    best: bestGroup,
+    cost: bestCost,
+    numPrefs: numPrefrences
   };
+}
+
+
+function sendToStudents(studentSocketIDs, event, payload) {
+  for (socketID of studentSocketIDs) {
+    io.to(socketID).emit(event, payload);
+  }
 }
 
 
@@ -339,12 +346,15 @@ io.on("connection", (socket) => {
     verify(teacherData.token).then((payload) => {
       let templateUserActions = {
         //tracks who has done what action (w/ subject IDs from tokens)
-        "sessionJoin": [],
-        "studentSendData": [],
-        "sessionLeave": [],
-        "studentReady": [],
+        sessionJoin: [],
+        studentSendData: [],
+        sessionLeave: [],
+        studentReady: [],
         //only person authorized to do teacher actions
-        "teacher": payload.userID
+        teacher: {
+          userID: payload.userID,
+          socketID: socket.id
+        }
       }
       console.log("teacher set as " + payload.userID);
 
@@ -352,9 +362,10 @@ io.on("connection", (socket) => {
         sessionID: teacherData.sessionID,
         studentList: [],
         prefs: [],
-        emailAddresses: {}, 
+        emailAddresses: {},
         userActions: templateUserActions,
-        maxSelections: teacherData.maxSelections
+        maxSelections: teacherData.maxSelections,
+        studentSocketIDs: []
       };
 
 
@@ -379,24 +390,29 @@ io.on("connection", (socket) => {
     let sessionData = findSessionByID(data, studentData.sessionID); //find sessionID in data at [0] of element)
     if (sessionData) {
       verify(studentData.token, "student").then((payload) => {
-        if (!sessionData.userActions["sessionJoin"].includes(payload.userID)) { //if (sessionJoin array doesnt already have the user in it)
+        if (!sessionData.userActions.sessionJoin.includes(payload.userID)) { //if (sessionJoin array doesnt already have the user in it)
           sessionData.studentList.push(payload.name);
           sessionData.userActions.sessionJoin.push(payload.userID);
           sessionData.userActions.sessionLeave = arrayRemove(sessionData.userActions.sessionLeave, payload.userID);
+          let teacherSocketID = sessionData.userActions.teacher.socketID;
 
           console.log("student user ID " + payload.userID + " joined");
           socket.emit("sessionSuccess", {
             sessionID: studentData.sessionID,
             maxSelections: sessionData.maxSelections
           });
-          io.emit("updateStudentList", {
+
+          sessionData.studentSocketIDs.push(socket.id);
+          sendToStudents(sessionData.studentSocketIDs, "updateStudentList", {
             sessionData: sessionData,
             name: payload.name,
             type: "add"
           });
 
+
+
           sessionData.emailAddresses[`${payload.name}`] = payload.email;
-          socket.broadcast.emit("updateTeacherInfo", { //tells teachers to update student leftover counters
+          io.to(teacherSocketID).emit("updateTeacherInfo", { //tells teachers to update student leftover counters
             studentList: sessionData.studentList,
             sessionID: studentData.sessionID
           });
@@ -413,7 +429,7 @@ io.on("connection", (socket) => {
                 violationGroupSize = leftOverStudents;
               }
 
-              socket.broadcast.emit("updateTeacherInfo", { //tells teachers to update student leftover counters
+              io.to(teacherSocketID).emit("updateTeacherInfo", { //tells teachers to update student leftover counters
                 violation: true,
                 sessionID: studentData.sessionID,
                 leftOver: violationGroupSize
@@ -422,7 +438,7 @@ io.on("connection", (socket) => {
           }
 
           else {
-            socket.broadcast.emit("updateTeacherInfo", {
+            io.to(teacherSocketID).emit("updateTeacherInfo", {
               violation: false,
               sessionID: studentData.sessionID
             });
@@ -438,6 +454,7 @@ io.on("connection", (socket) => {
       }).catch((err) => {
         socket.emit("sessionReject", "invalidUserAction");
         console.log("session rejected: invalid action (after dlogin)");
+        console.log(err);
       });
     }
 
@@ -448,38 +465,45 @@ io.on("connection", (socket) => {
   });
 
   socket.on("endSession", (teacherData) => {
+    console.log("tried to end session");
     let sessionID = teacherData.sessionID;
     let sessionData = findSessionByID(data, sessionID);
-    verify(teacherData.token).then((payload) => {
-      if (sessionData.userActions.teacher == payload.userID) {
-        console.log(`ending session ${teacherData.sessionID}`);
+    if (sessionData) {
+      let studentSocketIDs = sessionData.studentSocketIDs;
+      verify(teacherData.token).then((payload) => {
+        if (sessionData.userActions.teacher.userID == payload.userID) {
+          console.log(`ending session ${teacherData.sessionID}`);
 
-        socket.emit("getEmails", {
-          sessionID: sessionID,
-          emails: sessionData.emailAddresses
-        });
-
-        if (!teacherData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
-          io.emit("clientSessionEnd", {
+          socket.emit("getEmails", {
             sessionID: sessionID,
-            disconnect: false
+            emails: sessionData.emailAddresses
           });
-        }
 
-        else {
-          if (teacherData.disconnect || sessionData.studentList.length == 0) { //clear that session if disconncected OR no students
-            data = arrayRemove(data, sessionData);
+          if (!teacherData.disconnect) { //we dont want to tell the other students that the session has ended if their teacher disconnected.
+
+            sendToStudents(studentSocketIDs, "clientSessionEnd", {
+              sessionID: sessionID,
+              disconnect: false
+            });
           }
 
-          io.emit("clientSessionEnd", {
-            sessionID: sessionID,
-            disconnect: true
-          });
+          else {
+            if (teacherData.disconnect || sessionData.studentList.length == 0) { //clear that session if disconncected OR no students
+              data = arrayRemove(data, sessionData);
+            }
+
+
+            sendToStudents(studentSocketIDs, "clientSessionEnd", {
+              sessionID: sessionID,
+              disconnect: true
+            });
+          }
         }
-      }
-    }).catch(() => {
-      console.log("invalid teacher action");
-    });
+      }).catch((err) => {
+        console.log("invalid teacher action");
+        console.log(err);
+      });
+    }
   });
 
   socket.on("studentSendData", (sentData) => {
@@ -496,7 +520,7 @@ io.on("connection", (socket) => {
                 invalidPrefs = true;
               }
             });
-            
+
 
           }
 
@@ -504,16 +528,16 @@ io.on("connection", (socket) => {
             sessionData.prefs.push(sentData.prefs);
             sessionData.userActions.studentSendData.push(payload.userID);
           }
-          
+
           else {
             socket.emit("sessionReject", "invalidPrefs"); //this goes straight to the student
-            console.log("prefrenced were rejected");
+            console.log("prefrences were rejected");
           }
 
           if (sessionData.prefs.length == sessionData.studentList.length) { //all student data has arrived
             let constraint, constraintValue;
             if (sessionData.groupSize) {
-              constraint = "groupSize"; 
+              constraint = "groupSize";
               constraintValue = sessionData.groupSize;
             }
 
@@ -523,13 +547,17 @@ io.on("connection", (socket) => {
             }
             if (sessionData.prefs.length > 1) {
               let groupData = findOptimum(constraint, constraintValue, sessionData.studentList, sessionData.prefs);
-              io.emit("GetGroups", {
+              let copyOfsocketIDs = JSON.parse(JSON.stringify(sessionData.studentSocketIDs));
+              copyOfsocketIDs.push(sessionData.userActions.teacher.socketID);
+
+              sendToStudents(copyOfsocketIDs, "GetGroups", {
                 sessionID: sessionData.sessionID,
                 groups: groupData.best,
                 prefs: sessionData.prefs
               });
 
-              socket.broadcast.emit("updateTeacherInfo", {
+              let teacherSocketID = sessionData.userActions.teacher.socketID;
+              io.to(teacherSocketID).emit("updateTeacherInfo", {
                 cost: groupData.cost,
                 numPrefs: groupData.numPrefs,
                 sessionID: sessionData.sessionID,
@@ -546,11 +574,11 @@ io.on("connection", (socket) => {
           }
         }
       })
-      .catch((err) => {
-        socket.emit("sessionReject", "invalidUserAction");
-        console.log("invalid user action, after (not ready)");
-        console.log(err);
-      });
+        .catch((err) => {
+          socket.emit("sessionReject", "invalidUserAction");
+          console.log("invalid user action, after (not ready)");
+          console.log(err);
+        });
     }
   });
 
@@ -583,18 +611,19 @@ io.on("connection", (socket) => {
           sessionData.userActions.sessionJoin = arrayRemove(sessionData.userActions.sessionJoin, payload.userID);
           sessionData.userActions.studentSendData = arrayRemove(sessionData.userActions.studentSendData, payload.userID);
           sessionData.userActions.studentReady = arrayRemove(sessionData.userActions.studentReady, payload.userID);
+          let teacherSocketID = sessionData.userActions.teacher.socketID;
+          delete sessionData.emailAddresses[`${payload.name}`];  //remove their name from the email list
+          let studentSocketIDs = sessionData.studentSocketIDs;
+          studentSocketIDs = arrayRemove(studentSocketIDs, socket.id);   //remove their socket id
 
-          //remove their name from the email list
-          delete sessionData.emailAddresses[`${payload.name}`];
 
-
-          io.emit("updateStudentList", {
+          sendToStudents(studentSocketIDs, "updateStudentList", {
             sessionData: sessionData,
             name: payload.name,
             type: "remove"
           });
 
-          socket.broadcast.emit("updateTeacherInfo", {
+          io.to(teacherSocketID).emit("updateTeacherInfo", {
             sessionID: studentData.sessionID,
             studentList: sessionData.studentList,
             name: payload.name,
@@ -618,9 +647,10 @@ io.on("connection", (socket) => {
     if (sessionData) {
       verify(studentData.token, "student").then((payload) => {
         let currentActionArray = sessionData.userActions.studentReady;
+        let teacherSocketID = sessionData.userActions.teacher.socketID;
         if (!currentActionArray.includes(payload.userID)) {
           currentActionArray.push(payload.userID);
-          socket.broadcast.emit("updateTeacherInfo", {
+          io.to(teacherSocketID).emit("updateTeacherInfo", {
             sessionID: studentData.sessionID,
             name: payload.name,
             type: "readyUp"
