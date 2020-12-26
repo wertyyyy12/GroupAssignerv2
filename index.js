@@ -516,6 +516,10 @@ io.on("connection", (socket) => {
               }
             });
 
+            //check that students didnt submit more prefrences than allowed
+            if (sentData.prefs[1].length > sessionData.maxSelections) {
+              invalidPrefs = true;
+            }
 
           }
 

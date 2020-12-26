@@ -137,12 +137,15 @@ $(document).ready(function () {
         }
 
         if (data.type == "GroupInfo") {
-            console.log(data);
-            let accomodationPercent = (((data.numPrefs - data.cost) / (data.numPrefs)) * 100).toFixed(2);
-            if (!accomodationPercent) {
-                accomodationPercent = 0;
+            if (data.numPrefs != 0) {
+                let accomodationPercent = (((data.numPrefs - data.cost) / (data.numPrefs)) * 100).toFixed(2);
+                $("#prefsFulfilled").html(`<b>${data.numPrefs - data.cost}</b> out of ${data.numPrefs} prefrences fulfilled. (${accomodationPercent}%)`);
             }
-            $("#prefsFulfilled").html(`<b>${data.numPrefs - data.cost}</b> out of ${data.numPrefs} prefrences fulfilled. (${accomodationPercent}%)`);
+            
+            if (data.numPrefs == 0) {
+                $("#prefsFulfilled").html("<b>0</b> prefrences submitted.");
+            }
+            
         }
 
     });
@@ -289,6 +292,7 @@ $(document).ready(function () {
         });
 
         $("#saveGroups").css("display", "inline");
+        $("#groupsList").css("display", "inline");
         toastr.success(`Ended Session ID "${mySessionID}"`);
     });
 

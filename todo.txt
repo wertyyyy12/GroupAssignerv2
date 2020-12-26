@@ -1,9 +1,4 @@
 -student rosters -> list of absent students
--Server side input filtering
-    -student choices are reasonable (not nonsense that doesnt exist)
-    -num choices <= allowed choices
-
--validations based on tokens instead of sessionID
 
 ASK:
     -teacher add absent students 
