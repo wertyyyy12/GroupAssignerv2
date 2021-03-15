@@ -293,6 +293,7 @@ $(document).ready(function () {
 
         $("#saveGroups").css("display", "inline");
         $("#groupsList").css("display", "inline");
+        $("#groupsList").css("width", "fit-content");
         toastr.success(`Ended Session ID "${mySessionID}"`);
     });
 
