@@ -264,7 +264,7 @@ for (i = 0; i < 50; i++) {
     finalPrefs.push(pref);
   }
   console.time("opt");
-  optimum = findOptimum("numGroups", 6, studentList, finalPrefs);
+  optimum = findOptimum("numGroups", 8, studentList, finalPrefs);
   console.timeEnd("opt");
   itersTook = optimum.iter;
   cost = optimum.cost;
