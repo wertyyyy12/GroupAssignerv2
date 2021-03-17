@@ -257,11 +257,13 @@ $(document).ready(function () {
                 //     token: idToken
                 // });
 
-                $("#sID").prop("disabled", true);
-                $("#groupSize").prop("disabled", true);
-                $("#numberOfGroups").prop("disabled", true);
+                disableElements = [$("#maxSelections"), $("#numberOfGroups"), $("#groupSize")]; //disable these elements after session starts
+                $("#startSession").css("display", "none"); //remove the start session button
 
-                $("#startSession").css("display", "none");
+                disableElements.forEach(function(element) {
+                    element.prop("disabled", true);
+                });
+
 
                 $("#sIDindicator").html("<b>Session ID: </b>" + mySessionID);
                 if ($("#groupSize").val() >= 2) {
@@ -272,6 +274,8 @@ $(document).ready(function () {
                     $("#gInfoindicator").html("<b>Number of Groups: </b>" + $("#numberOfGroups").val());
                 }
 
+                $("#maxSelectionsIndicator").html("Max Student Prefrences: " + $("#maxSelections").val());
+
 
                 $("#endSession").css("display", "inline");
                 $("#copy-button").css("display", "inline");
@@ -281,19 +285,24 @@ $(document).ready(function () {
 
                 toastr.success("Session Created");
             }
+
+        }
+
         
+        if (!($("#groupSize").val() || $("#numberOfGroups").val())) { //if not (group size filled OR number of groups filled)
+            toastr.warning("Enter a group size or number of groups");
+        }
 
-            else {
-                if ($("#groupSize").val() == "" && $("#numberOfGroups").val() == "") {
-                    toastr.warning("Enter a group size or number of groups")
-                }
+        if ($("#groupSize").val() < 2 && $("#groupSize").val())  { //if they entered something but its <2
+            toastr.warning("Group size must be at least 2");
+        }
 
-                else if ($("#groupSize").val() < 2 || $("#numberOfGroups").val() < 2) {
-                    toastr.warning("Group size or number of groups must be at least 2")
-                }
-            }
+        if ($("#numberOfGroups").val() < 2 && $("#numberOfGroups").val()) { //same as above for # groups
+            toastr.warning("Number of groups must be at least 2");
+        }
 
-
+        if (!$("#maxSelections").val()) { //check for max student prefs
+            toastr.warning("Enter maximum student prefrences");
         }
     });
 

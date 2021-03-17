@@ -8,7 +8,7 @@ $(document).ready(function () {
     sessionStorage.removeItem("userToken");
     sessionStorage.removeItem("studentName");
 
-    // //jsut in case
+    //just in case
     sessionStorage.removeItem("teacherName");
 
     if (!myName) {
@@ -33,10 +33,10 @@ $(document).ready(function () {
 
 
     // //prevents duplicate notifications from showing up (no trolling lol)
-    // toastr.options = {
-    //     "preventDuplicates": true,
-    //     "preventOpenDuplicates": true
-    // };
+    toastr.options = {
+        "preventDuplicates": true,
+        "preventOpenDuplicates": true
+    };
 
     function arrayRemove(array, element) {
         let arrayCopy = JSON.parse(JSON.stringify(array));
