@@ -228,7 +228,8 @@ $(document).ready(function () {
 
     $("#startSession").click(function () {
         if ((mySessionID != "") && ($("#maxSelections").val())) {
-            if (($("#groupSize").val() != "") || ($("#numberOfGroups").val() != "")) { //if either field is filled
+            //if either field is filled AND if either field has a value of at least 2
+            if ($("#groupSize").val() >= 2 || $("#numberOfGroups").val() >= 2) {
                 if ($("#groupSize").val() >= 2) {
                     socket.emit("sessionCreate", {
                         sessionID: mySessionID,
@@ -279,6 +280,17 @@ $(document).ready(function () {
 
                 toastr.success("Session Created");
             }
+        
+
+            else {
+                if ($("#groupSize").val() == "" && $("#numberOfGroups").val() == "") {
+                    toastr.warning("Enter a group size or number of groups")
+                }
+
+                else if ($("#groupSize").val() < 2 || $("#numberOfGroups").val() < 2) {
+                    toastr.warning("Group size or number of groups must be at least 2")
+                }
+            }
 
 
         }
@@ -328,11 +340,13 @@ $(document).ready(function () {
         window.location.href = '/';
     });
 
-    document.getElementById("groupSize").addEventListener("change", function () {
-        if (this.value <= 1) {
-            this.value = 2;
-        }
-    });
+    // document.getElementById("groupSize").addEventListener("change", function () {
+    //     if (this.value <= 1) {
+    //         if (!$("#numberOfGroups").val()) {
+    //             this.value = 2;
+    //         }
+    //     }
+    // });
 
     $("#groupSize").change(function () {  //change the other field so that they both cant be filled at the same time
         $("#numberOfGroups").val("");

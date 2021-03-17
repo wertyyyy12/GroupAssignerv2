@@ -74,7 +74,7 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
     function swapTwoPeople(sG, studentA, studentB) {
 
         let splitGroups = JSON.parse(JSON.stringify(sG));
-        let Agroup = splitGroups.find(group => group.includes(studentA));
+        let Agroup = splitGroups.find(group => group.includes(studentA)); //find student groups
         let Bgroup = splitGroups.find(group => group.includes(studentB));
 
         if (Agroup == Bgroup) {
@@ -91,7 +91,7 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
         Bgroup.push(studentA); //shove them in different groups
         Agroup.push(studentB);
 
-        splitGroups[Aindex] = Agroup;
+        splitGroups[Aindex] = Agroup; //update the total group list
         splitGroups[Bindex] = Bgroup;
 
         return splitGroups;
@@ -134,7 +134,7 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
     let bestCost = 9999;
     let bestGroup;
     let numPrefrences;
-    for (let j = 0; j <= studentList.length * 2; j++) {
+    for (let j = 0; j <= studentList.length * 2; j++) { //repeat many times mwhahaha (for best possible group)
         let randStudentList = shuffleArray(studentList);
         splitGroups = splitIntoGroups(constraintType, constraint, randStudentList);
         for (let i = 0; i < 2; i++) { //twice for good measure
@@ -198,13 +198,6 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
                             splitGroups = swapTwoPeople(splitGroups, swapPerson, student);
                             //swap
                         }
-
-                        // studentGroup.forEach((Aperson) => {
-                        //   if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
-                        //     gain--;
-                        //   }
-                        // });
-
                     });
 
                 });
