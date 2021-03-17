@@ -5,11 +5,11 @@ $(document).ready(function () {
     let idToken = sessionStorage.getItem("userToken");
 
     //makes tampering with these values a fair bit harder; not impossible though
-    // sessionStorage.removeItem("userToken");
-    // sessionStorage.removeItem("studentName");
+    sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("studentName");
 
     // //jsut in case
-    // sessionStorage.removeItem("teacherName");
+    sessionStorage.removeItem("teacherName");
 
     if (!myName) {
         window.location.href = "/";

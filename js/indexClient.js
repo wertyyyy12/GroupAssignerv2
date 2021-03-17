@@ -1,7 +1,5 @@
 var socket = io();
 var googleUser = {};
-console.log("hih");
-console.log("gi?");
 
 
 var startApp = function() {

@@ -159,11 +159,11 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
                         let Bprefs = findStudentPrefs(swapPerson, prefs)[1];
 
                         personGroup.forEach((Bperson) => {
-                            if (wantingB.includes(Bperson)) { //someone in B"s group wanted B
+                            if (wantingB.includes(Bperson)) { //someone in B's group wanted B
                                 gain--;
                             }
 
-                            if (wantingA.includes(Bperson)) { //somone in B"s group wants A
+                            if (wantingA.includes(Bperson)) { //somone in B's group wants A
                                 gain++;
                             }
 
@@ -177,11 +177,11 @@ function findOptimum(constraintType, constraint, studentList, prefs) {
                         });
 
                         studentGroup.forEach((Aperson) => {
-                            if (wantingA.includes(Aperson)) { //someone in A"s group wanted A
+                            if (wantingA.includes(Aperson)) { //someone in A's group wanted A
                                 gain--;
                             }
 
-                            if (wantingB.includes(Aperson)) { //somone in A"s group wants B
+                            if (wantingB.includes(Aperson)) { //somone in A's group wants B
                                 gain++;
                             }
 

@@ -10,11 +10,11 @@ $(document).ready(function () {
     let emailAdresses;
     // console.log(process);
     //temporary diversion to avoid tampering (by no means impossible)
-    // sessionStorage.removeItem("teacherName");
-    // sessionStorage.removeItem("userToken");
+    sessionStorage.removeItem("teacherName");
+    sessionStorage.removeItem("userToken");
 
     // //just in case
-    // sessionStorage.removeItem("studentName");
+    sessionStorage.removeItem("studentName");
 
     if (!myName) {
         window.location.href = "/";
@@ -25,9 +25,10 @@ $(document).ready(function () {
     }
 
     //REMOVE ON PRODUCTION.
-    $("#teacherName").html(`Teacher Name: ${myName}`);
 
-    $("#maxSelections").val(Math.floor(Math.random() * 4) + 1);
+    // $("#teacherName").html(`Teacher Name: ${myName}`);
+
+    // $("#maxSelections").val(Math.floor(Math.random() * 4) + 1);
 
 
 
