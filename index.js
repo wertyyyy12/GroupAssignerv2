@@ -1,7 +1,7 @@
-const { rejects } = require("assert");
-const { group } = require("console");
+// const { rejects } = require("assert");
+// const { group } = require("console");
 var express = require("express");
-var app = express();
+const app = express();
 // let path = require("path");
 var server = require("http").createServer(app);
 var io = require("socket.io")(server);
@@ -10,6 +10,27 @@ var port = process.env.PORT || 3001;
 const { OAuth2Client } = require('google-auth-library');
 const clientID = "984134543663-o74ijsk609uufcapnp6isnqi8eje8a2t.apps.googleusercontent.com"
 const client = new OAuth2Client(clientID);
+const Sentry = require('@sentry/node');
+const Tracing = require("@sentry/tracing");
+// import { Integrations } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: "https://1c00c519480b42a6bff522bbe71d286d@o563937.ingest.sentry.io/5704397",
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Tracing.Integrations.Express({ app }),
+  ],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 0.7,
+});
+
+
+
 
 async function verify(token, type) {
   const ticket = await client.verifyIdToken({
@@ -332,12 +353,21 @@ app.use("/html", express.static(__dirname + "/html"));
 app.use(express.static(__dirname + "/js"));
 app.use("/js", express.static(__dirname + "/js"));
 
+// RequestHandler creates a separate execution context using domains, so that every
+// transaction/span/breadcrumb is attached to its own Hub instance
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
+
+
 function findSessionByID(data, sessionID) {
   return data.find(session => session.sessionID == sessionID);
 }
 
+app.use(Sentry.Handlers.errorHandler());
+
 io.on("connection", (socket) => {
-  console.log("User connected.");
+  console.log("User connected.");``
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
