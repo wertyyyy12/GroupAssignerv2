@@ -1,4 +1,5 @@
 
+//
 function arrayRemove(array, element) {
     let arrayCopy = JSON.parse(JSON.stringify(array));
     return arrayCopy.filter(elem => JSON.stringify(elem) != JSON.stringify(element)); //watch for json.stringify it doesnt actually compare the elements
